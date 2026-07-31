@@ -1,0 +1,47 @@
+// alloy-config.river
+//
+// Grafana Alloy configuration for home-network-mcp.
+//
+// Alloy scrapes the local metrics exporter (exporter.py) and forwards
+// the data to Grafana Cloud for storage and dashboarding.
+//
+// Credentials are read from environment variables — never hardcode them here.
+// Set these on the Windows box before running Alloy:
+//
+//   $env:GRAFANA_REMOTE_WRITE_URL  = "https://prometheus-prod-xx.grafana.net/..."
+//   $env:GRAFANA_USER_ID           = "123456"
+//   $env:GRAFANA_API_KEY           = "glc_..."
+//
+// How to find your Grafana Cloud credentials:
+//   1. Sign up at https://grafana.com (free tier)
+//   2. Go to your stack → Connections → Add new connection → Prometheus
+//   3. Grafana will show you a pre-filled remote_write URL, user ID, and API key
+
+// ---------------------------------------------------------------------------
+// Scrape: pull metrics from the local exporter every 30 seconds
+// ---------------------------------------------------------------------------
+
+prometheus.scrape "home_network" {
+  targets = [
+    { __address__ = "localhost:8000" },
+  ]
+
+  scrape_interval = "30s"
+
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+}
+
+// ---------------------------------------------------------------------------
+// Remote write: push scraped metrics to Grafana Cloud
+// ---------------------------------------------------------------------------
+
+prometheus.remote_write "grafana_cloud" {
+  endpoint {
+    url = env("GRAFANA_REMOTE_WRITE_URL")
+
+    basic_auth {
+      username = env("GRAFANA_USER_ID")
+      password = env("GRAFANA_API_KEY")
+    }
+  }
+}

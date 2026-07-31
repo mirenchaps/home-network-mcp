@@ -4,5 +4,11 @@
     { "name": "HOMELAB-DC01", "role": "domain-controller", "watch_services": ["DNS", "NTDS", "Netlogon"] },
     { "name": "HOMELAB-FILESRV", "role": "file-server", "watch_services": ["LanmanServer"] }
   ],
-  "disk_warn_threshold_percent": 15
+  "disk_warn_threshold_percent": 15,
+  "pi": {
+    "host": "raspberrypi.local",
+    "user": "pi",
+    "ssh_key_path": null,
+    "watch_services": ["homebridge"]
+  }
 }
