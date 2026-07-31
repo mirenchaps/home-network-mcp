@@ -4,6 +4,9 @@
 # Docs: https://docs.astral.sh/ruff/configuration/
 # Rule index: https://docs.astral.sh/ruff/rules/
 
+# line-length is top-level — applies to both linting (E501) and formatting
+line-length = 120
+
 [lint]
 # E/W: pycodestyle errors and warnings
 # F:   pyflakes (undefined names, unused imports, etc.)
