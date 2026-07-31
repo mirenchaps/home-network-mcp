@@ -13,8 +13,8 @@ Docs: https://docs.pytest.org  /  https://pytest-asyncio.readthedocs.io
 
 from unittest.mock import AsyncMock, patch
 
-import pytest
 from prometheus_client import REGISTRY
+import pytest
 
 import exporter
 
