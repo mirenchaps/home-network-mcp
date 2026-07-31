@@ -1,0 +1,12 @@
+# home-network-mcp/ruff.toml
+#
+# ruff configuration.
+# Docs: https://docs.astral.sh/ruff/configuration/
+# Rule index: https://docs.astral.sh/ruff/rules/
+
+[lint]
+# E/W: pycodestyle errors and warnings
+# F:   pyflakes (undefined names, unused imports, etc.)
+# I:   isort import ordering — disabled, we don't enforce import sort order
+select = ["E", "W", "F"]
+ignore = ["I001"]
