@@ -1,0 +1,33 @@
+# home-network-mcp/.github/workflows/ci.yml
+#
+# CI pipeline for home-network-mcp.
+#
+# This file is intentionally thin — all the logic lives in the reusable
+# workflow in ci-platform. Adding CI to a new project means copying these
+# ~15 lines and changing the image-name.
+#
+# The reusable workflow runs: lint → test → docker build → docker push
+#
+# Required repository secrets (Settings → Secrets → Actions):
+#   DOCKERHUB_USERNAME  — your Docker Hub username
+#   DOCKERHUB_TOKEN     — Docker Hub access token (not your password)
+#                         Create at: hub.docker.com → Account Settings → Security
+#
+# Docs on calling reusable workflows:
+#   https://docs.github.com/en/actions/sharing-automations/reusing-workflows#calling-a-reusable-workflow
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    uses: mirenchaps/ci-platform/.github/workflows/python-ci.yml@main
+    with:
+      # "mirenchaps/home-network-mcp" becomes the full image name on Docker Hub
+      image-name: home-network-mcp
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

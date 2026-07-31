@@ -1,0 +1,15 @@
+# home-network-mcp/requirements-dev.txt
+#
+# Development-only dependencies — not installed in the Docker image.
+# Install with: pip install -r requirements-dev.txt
+#
+# ruff:           fast Python linter (replaces flake8/isort/pyupgrade)
+#                 Docs: https://docs.astral.sh/ruff/
+# pytest:         test runner
+#                 Docs: https://docs.pytest.org
+# pytest-asyncio: enables async test functions (needed for async tool code)
+#                 Docs: https://pytest-asyncio.readthedocs.io
+
+ruff>=0.4.0
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
