@@ -100,6 +100,9 @@ async def run_ssh_bash_script(
     cmd += [
         "-o", "BatchMode=yes",
         "-o", "ConnectTimeout=5",
+        # StrictHostKeyChecking=no: skip known_hosts verification.
+        # Safe on a private home network where the container has no known_hosts file.
+        "-o", "StrictHostKeyChecking=no",
         f"{user}@{host}",
         "bash", "-s", "--",
     ]

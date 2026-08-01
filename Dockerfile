@@ -36,12 +36,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         openssh-client \
         wget \
         ca-certificates \
+        libssl3 \
     && wget -q "https://github.com/PowerShell/PowerShell/releases/download/v7.6.4/powershell_7.6.4-1.deb_amd64.deb" \
     && dpkg -i powershell_7.6.4-1.deb_amd64.deb || true \
     && apt-get install -f -y \
     && rm powershell_7.6.4-1.deb_amd64.deb \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && pwsh -Command "Install-Module -Name PSWSMan -Force -Scope AllUsers" \
+    && pwsh -Command "Install-WSMan"
 
 # Copy the installed packages from the builder stage
 COPY --from=builder /install /usr/local
