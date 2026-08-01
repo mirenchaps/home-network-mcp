@@ -185,3 +185,4 @@ home-network-mcp/
 - **This is a personal project for my own home lab, not hardened for production or multi-tenant use — no auth on the PowerShell remoting beyond standard WinRM, no rate limiting, no retry logic beyond a basic timeout.**
 - Local (non-domain) WinRM setups may need `TrustedHosts` configured for cross-machine calls without Kerberos.
 - Tested against Windows Server 2022 and Windows 11 hosts on PowerShell 7.4.
+
