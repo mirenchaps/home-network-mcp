@@ -29,16 +29,16 @@ FROM python:3.12-slim
 WORKDIR /app
 
 # Install PowerShell 7 (for WinRM calls) and openssh-client (for SSH to Pi).
-# Microsoft's install guide: https://learn.microsoft.com/en-us/powershell/scripting/install/install-debian
+# Using the direct .deb download from GitHub — more reliable in Docker than the apt repo method.
+# PowerShell release page: https://github.com/PowerShell/PowerShell/releases
 RUN apt-get update && apt-get install -y --no-install-recommends \
         openssh-client \
         wget \
         ca-certificates \
-    && wget -q "https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb" \
-    && dpkg -i packages-microsoft-prod.deb \
-    && rm packages-microsoft-prod.deb \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends powershell \
+    && wget -q "https://github.com/PowerShell/PowerShell/releases/download/v7.6.4/powershell_7.6.4-1.deb_amd64.deb" \
+    && dpkg -i powershell_7.6.4-1.deb_amd64.deb \
+    && apt-get install -f -y \
+    && rm powershell_7.6.4-1.deb_amd64.deb \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
