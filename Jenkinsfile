@@ -37,7 +37,8 @@ pipeline {
                 terraformDeploy(
                     imageTag:       "mirenchaps/home-network-mcp:${params.IMAGE_TAG}",
                     port:           8000,
-                    configFilePath: '/etc/home-network-mcp/config.json'
+                    configFilePath: '/etc/home-network-mcp/config.json',
+                    sshKeyPath:     '/etc/home-network-mcp/id_ed25519'
                 )
             }
         }
