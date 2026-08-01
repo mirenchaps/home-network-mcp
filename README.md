@@ -186,3 +186,4 @@ home-network-mcp/
 - Local (non-domain) WinRM setups may need `TrustedHosts` configured for cross-machine calls without Kerberos.
 - Tested against Windows Server 2022 and Windows 11 hosts on PowerShell 7.4.
 
+
