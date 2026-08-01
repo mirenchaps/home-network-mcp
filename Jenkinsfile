@@ -35,8 +35,9 @@ pipeline {
         stage('Deploy') {
             steps {
                 terraformDeploy(
-                    imageTag: "mirenchaps/home-network-mcp:${params.IMAGE_TAG}",
-                    port: 8000
+                    imageTag:       "mirenchaps/home-network-mcp:${params.IMAGE_TAG}",
+                    port:           8000,
+                    configFilePath: '/etc/home-network-mcp/config.json'
                 )
             }
         }
