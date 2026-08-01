@@ -29,14 +29,15 @@ FROM python:3.12-slim
 WORKDIR /app
 
 # Install PowerShell 7 (for WinRM calls) and openssh-client (for SSH to Pi).
-# Using the direct .deb download from GitHub — more reliable in Docker than the apt repo method.
-# PowerShell release page: https://github.com/PowerShell/PowerShell/releases
+# dpkg -i exits with code 1 on missing deps — || true lets the chain continue
+# so apt-get install -f can resolve those deps immediately after.
+# PowerShell release: https://github.com/PowerShell/PowerShell/releases
 RUN apt-get update && apt-get install -y --no-install-recommends \
         openssh-client \
         wget \
         ca-certificates \
     && wget -q "https://github.com/PowerShell/PowerShell/releases/download/v7.6.4/powershell_7.6.4-1.deb_amd64.deb" \
-    && dpkg -i powershell_7.6.4-1.deb_amd64.deb \
+    && dpkg -i powershell_7.6.4-1.deb_amd64.deb || true \
     && apt-get install -f -y \
     && rm powershell_7.6.4-1.deb_amd64.deb \
     && apt-get clean \
