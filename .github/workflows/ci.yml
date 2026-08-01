@@ -28,6 +28,4 @@ jobs:
     with:
       # "mirenchaps/home-network-mcp" becomes the full image name on Docker Hub
       image-name: home-network-mcp
-    secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    secrets: inherit
