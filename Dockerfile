@@ -28,6 +28,21 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+# Install PowerShell 7 (for WinRM calls) and openssh-client (for SSH to Pi).
+# Microsoft's install guide: https://learn.microsoft.com/en-us/powershell/scripting/install/install-debian
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        openssh-client \
+        wget \
+        apt-transport-https \
+        software-properties-common \
+    && wget -q "https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb" \
+    && dpkg -i packages-microsoft-prod.deb \
+    && rm packages-microsoft-prod.deb \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends powershell \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy the installed packages from the builder stage
 COPY --from=builder /install /usr/local
 
