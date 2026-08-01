@@ -43,8 +43,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm powershell_7.6.4-1.deb_amd64.deb \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && pwsh -Command "Install-Module -Name PSWSMan -Force -Scope AllUsers" \
-    && pwsh -Command "Install-WSMan"
+    && pwsh -NonInteractive -Command "Install-Module -Name PSWSMan -Force -Scope AllUsers; Import-Module PSWSMan; Install-WSMan"
 
 # Copy the installed packages from the builder stage
 COPY --from=builder /install /usr/local
