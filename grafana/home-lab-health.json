@@ -1,0 +1,517 @@
+{
+	"title": "Home Lab Health",
+	"uid": "home-lab-health-v1",
+	"tags": [
+		"home-lab"
+	],
+	"timezone": "browser",
+	"refresh": "30s",
+	"schemaVersion": 38,
+	"time": {
+		"from": "now-1h",
+		"to": "now"
+	},
+	"templating": {
+		"list": [
+			{
+				"name": "datasource",
+				"type": "datasource",
+				"query": "prometheus",
+				"hide": 0,
+				"refresh": 1
+			}
+		]
+	},
+	"panels": [
+		{
+			"id": 10,
+			"type": "row",
+			"title": "Device Status",
+			"gridPos": {
+				"h": 1,
+				"w": 24,
+				"x": 0,
+				"y": 0
+			},
+			"collapsed": false
+		},
+		{
+			"id": 1,
+			"type": "stat",
+			"title": "Raspberry Pi",
+			"gridPos": {
+				"h": 6,
+				"w": 8,
+				"x": 0,
+				"y": 1
+			},
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"targets": [
+				{
+					"expr": "home_pi_uptime_seconds > bool 0",
+					"instant": true,
+					"refId": "A",
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					}
+				}
+			],
+			"options": {
+				"colorMode": "background",
+				"graphMode": "none",
+				"justifyMode": "center",
+				"textMode": "auto",
+				"reduceOptions": {
+					"calcs": [
+						"lastNotNull"
+					]
+				}
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "red",
+								"value": null
+							},
+							{
+								"color": "green",
+								"value": 1
+							}
+						]
+					},
+					"mappings": [
+						{
+							"type": "value",
+							"options": {
+								"0": {
+									"text": "DOWN",
+									"color": "red",
+									"index": 1
+								},
+								"1": {
+									"text": "UP",
+									"color": "green",
+									"index": 0
+								}
+							}
+						}
+					]
+				}
+			}
+		},
+		{
+			"id": 2,
+			"type": "stat",
+			"title": "Windows Server",
+			"gridPos": {
+				"h": 6,
+				"w": 8,
+				"x": 8,
+				"y": 1
+			},
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"targets": [
+				{
+					"expr": "home_device_up{host=\"192.168.0.124\"}",
+					"instant": true,
+					"refId": "A",
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					}
+				}
+			],
+			"options": {
+				"colorMode": "background",
+				"graphMode": "none",
+				"justifyMode": "center",
+				"textMode": "auto",
+				"reduceOptions": {
+					"calcs": [
+						"lastNotNull"
+					]
+				}
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "red",
+								"value": null
+							},
+							{
+								"color": "green",
+								"value": 1
+							}
+						]
+					},
+					"mappings": [
+						{
+							"type": "value",
+							"options": {
+								"0": {
+									"text": "DOWN",
+									"color": "red",
+									"index": 1
+								},
+								"1": {
+									"text": "UP",
+									"color": "green",
+									"index": 0
+								}
+							}
+						}
+					]
+				}
+			}
+		},
+		{
+			"id": 3,
+			"type": "stat",
+			"title": "Homebridge",
+			"gridPos": {
+				"h": 6,
+				"w": 8,
+				"x": 16,
+				"y": 1
+			},
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"targets": [
+				{
+					"expr": "home_pi_service_up{service=\"homebridge\"}",
+					"instant": true,
+					"refId": "A",
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					}
+				}
+			],
+			"options": {
+				"colorMode": "background",
+				"graphMode": "none",
+				"justifyMode": "center",
+				"textMode": "auto",
+				"reduceOptions": {
+					"calcs": [
+						"lastNotNull"
+					]
+				}
+			},
+			"fieldConfig": {
+				"defaults": {
+					"color": {
+						"mode": "thresholds"
+					},
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "red",
+								"value": null
+							},
+							{
+								"color": "green",
+								"value": 1
+							}
+						]
+					},
+					"mappings": [
+						{
+							"type": "value",
+							"options": {
+								"0": {
+									"text": "DOWN",
+									"color": "red",
+									"index": 1
+								},
+								"1": {
+									"text": "UP",
+									"color": "green",
+									"index": 0
+								}
+							}
+						}
+					]
+				}
+			}
+		},
+		{
+			"id": 20,
+			"type": "row",
+			"title": "Raspberry Pi",
+			"gridPos": {
+				"h": 1,
+				"w": 24,
+				"x": 0,
+				"y": 7
+			},
+			"collapsed": false
+		},
+		{
+			"id": 4,
+			"type": "stat",
+			"title": "Uptime",
+			"gridPos": {
+				"h": 6,
+				"w": 8,
+				"x": 0,
+				"y": 8
+			},
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"targets": [
+				{
+					"expr": "home_pi_uptime_seconds",
+					"instant": true,
+					"refId": "A",
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					}
+				}
+			],
+			"options": {
+				"colorMode": "value",
+				"graphMode": "none",
+				"justifyMode": "center",
+				"textMode": "auto",
+				"reduceOptions": {
+					"calcs": [
+						"lastNotNull"
+					]
+				}
+			},
+			"fieldConfig": {
+				"defaults": {
+					"unit": "dtdurations",
+					"color": {
+						"mode": "thresholds"
+					},
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "blue",
+								"value": null
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"id": 5,
+			"type": "gauge",
+			"title": "Root Disk Used ( / )",
+			"gridPos": {
+				"h": 6,
+				"w": 8,
+				"x": 8,
+				"y": 8
+			},
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"targets": [
+				{
+					"expr": "(1 - home_pi_disk_free_ratio{mount=\"/\"}) * 100",
+					"instant": true,
+					"refId": "A",
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					}
+				}
+			],
+			"options": {
+				"reduceOptions": {
+					"calcs": [
+						"lastNotNull"
+					]
+				},
+				"showThresholdMarkers": true,
+				"minVizWidth": 75
+			},
+			"fieldConfig": {
+				"defaults": {
+					"unit": "percent",
+					"min": 0,
+					"max": 100,
+					"color": {
+						"mode": "thresholds"
+					},
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "yellow",
+								"value": 70
+							},
+							{
+								"color": "red",
+								"value": 85
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"id": 6,
+			"type": "gauge",
+			"title": "Boot Disk Used ( /boot )",
+			"gridPos": {
+				"h": 6,
+				"w": 8,
+				"x": 16,
+				"y": 8
+			},
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"targets": [
+				{
+					"expr": "(1 - home_pi_disk_free_ratio{mount=\"/boot\"}) * 100",
+					"instant": true,
+					"refId": "A",
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					}
+				}
+			],
+			"options": {
+				"reduceOptions": {
+					"calcs": [
+						"lastNotNull"
+					]
+				},
+				"showThresholdMarkers": true,
+				"minVizWidth": 75
+			},
+			"fieldConfig": {
+				"defaults": {
+					"unit": "percent",
+					"min": 0,
+					"max": 100,
+					"color": {
+						"mode": "thresholds"
+					},
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "yellow",
+								"value": 70
+							},
+							{
+								"color": "red",
+								"value": 85
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"id": 7,
+			"type": "timeseries",
+			"title": "Disk Usage Over Time",
+			"gridPos": {
+				"h": 10,
+				"w": 24,
+				"x": 0,
+				"y": 14
+			},
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"targets": [
+				{
+					"expr": "(1 - home_pi_disk_free_ratio) * 100",
+					"legendFormat": "{{mount}}",
+					"refId": "A",
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					}
+				}
+			],
+			"options": {
+				"legend": {
+					"displayMode": "list",
+					"placement": "bottom",
+					"showLegend": true
+				},
+				"tooltip": {
+					"mode": "single"
+				}
+			},
+			"fieldConfig": {
+				"defaults": {
+					"unit": "percent",
+					"min": 0,
+					"max": 100,
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"drawStyle": "line",
+						"lineWidth": 2,
+						"fillOpacity": 15,
+						"showPoints": "never",
+						"spanNulls": false
+					},
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 85
+							}
+						]
+					}
+				}
+			}
+		}
+	]
+}
