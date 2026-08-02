@@ -14,7 +14,9 @@
 
 param(
     [string]$ComputerName = "localhost",
-    [int]$WarnThresholdPercent = 15
+    [int]$WarnThresholdPercent = 15,
+    [string]$Username = "",
+    [string]$Password = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -38,7 +40,18 @@ try {
     if ($ComputerName -eq "localhost" -or $ComputerName -eq $env:COMPUTERNAME) {
         $volumes = & $scriptBlock $WarnThresholdPercent
     } else {
-        $volumes = Invoke-Command -ComputerName $ComputerName -ScriptBlock $scriptBlock -ArgumentList $WarnThresholdPercent
+        $invokeParams = @{
+            ComputerName = $ComputerName
+            ScriptBlock  = $scriptBlock
+            ArgumentList = $WarnThresholdPercent
+        }
+        # On Linux, Kerberos is unavailable — pass explicit credentials if provided.
+        if ($Username -and $Password) {
+            $securePass = ConvertTo-SecureString $Password -AsPlainText -Force
+            $invokeParams.Credential = New-Object PSCredential($Username, $securePass)
+            $invokeParams.Authentication = "Basic"
+        }
+        $volumes = Invoke-Command @invokeParams
     }
 
     $output = [PSCustomObject]@{

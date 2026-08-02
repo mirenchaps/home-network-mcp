@@ -34,12 +34,25 @@ pipeline {
     stages {
         stage('Deploy') {
             steps {
-                terraformDeploy(
-                    imageTag:       "mirenchaps/home-network-mcp:${params.IMAGE_TAG}",
-                    port:           8000,
-                    configFilePath: '/etc/home-network-mcp/config.json',
-                    sshKeyPath:     '/etc/home-network-mcp/id_ed25519'
-                )
+                // withCredentials pulls WINRM_USERNAME and WINRM_PASSWORD from the
+                // Jenkins credential store and binds them to local variables.
+                // They are masked in logs and never stored in the image.
+                // Add credentials at: Jenkins → Manage Jenkins → Credentials
+                withCredentials([
+                    string(credentialsId: 'WINRM_USERNAME', variable: 'WINRM_USER'),
+                    string(credentialsId: 'WINRM_PASSWORD', variable: 'WINRM_PASS'),
+                ]) {
+                    terraformDeploy(
+                        imageTag:       "mirenchaps/home-network-mcp:${params.IMAGE_TAG}",
+                        port:           8000,
+                        configFilePath: '/etc/home-network-mcp/config.json',
+                        sshKeyPath:     '/etc/home-network-mcp/id_ed25519',
+                        envVars: [
+                            WINRM_USERNAME: env.WINRM_USER,
+                            WINRM_PASSWORD: env.WINRM_PASS,
+                        ]
+                    )
+                }
             }
         }
 

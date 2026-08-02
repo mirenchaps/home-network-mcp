@@ -10,7 +10,9 @@
 #>
 
 param(
-    [string]$ComputerName = "localhost"
+    [string]$ComputerName = "localhost",
+    [string]$Username = "",
+    [string]$Password = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -19,7 +21,12 @@ try {
     if ($ComputerName -eq "localhost" -or $ComputerName -eq $env:COMPUTERNAME) {
         $os = Get-CimInstance -ClassName Win32_OperatingSystem
     } else {
-        $os = Get-CimInstance -ClassName Win32_OperatingSystem -ComputerName $ComputerName
+        $cimParams = @{ ClassName = 'Win32_OperatingSystem'; ComputerName = $ComputerName }
+        if ($Username -and $Password) {
+            $securePass = ConvertTo-SecureString $Password -AsPlainText -Force
+            $cimParams.Credential = New-Object PSCredential($Username, $securePass)
+        }
+        $os = Get-CimInstance @cimParams
     }
 
     $lastBoot = $os.LastBootUpTime

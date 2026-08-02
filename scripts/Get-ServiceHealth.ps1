@@ -20,7 +20,10 @@ param(
     [string]$ComputerName = "localhost",
 
     [Parameter(Mandatory = $true)]
-    [string[]]$ServiceNames
+    [string[]]$ServiceNames,
+
+    [string]$Username = "",
+    [string]$Password = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -29,10 +32,17 @@ try {
     if ($ComputerName -eq "localhost" -or $ComputerName -eq $env:COMPUTERNAME) {
         $services = Get-Service -Name $ServiceNames -ErrorAction SilentlyContinue
     } else {
-        $services = Invoke-Command -ComputerName $ComputerName -ScriptBlock {
-            param($names)
-            Get-Service -Name $names -ErrorAction SilentlyContinue
-        } -ArgumentList (,$ServiceNames)
+        $invokeParams = @{
+            ComputerName = $ComputerName
+            ScriptBlock  = { param($names) Get-Service -Name $names -ErrorAction SilentlyContinue }
+            ArgumentList = (,$ServiceNames)
+        }
+        if ($Username -and $Password) {
+            $securePass = ConvertTo-SecureString $Password -AsPlainText -Force
+            $invokeParams.Credential = New-Object PSCredential($Username, $securePass)
+            $invokeParams.Authentication = "Basic"
+        }
+        $services = Invoke-Command @invokeParams
     }
 
     $results = foreach ($svc in $services) {
