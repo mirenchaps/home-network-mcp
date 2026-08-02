@@ -55,7 +55,7 @@ try {
             $invokeParams.Authentication  = "Basic"
             $invokeParams.UseSSL          = $true
             $invokeParams.Port            = 5986
-            $invokeParams.SessionOption   = New-PSSessionOption -OpenTimeout 10000 -OperationTimeout 10000
+            $invokeParams.SessionOption   = New-PSSessionOption -OperationTimeout 10000
         }
         $volumes = Invoke-Command @invokeParams
     }
