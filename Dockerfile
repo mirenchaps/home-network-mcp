@@ -52,6 +52,10 @@ COPY --from=builder /install /usr/local
 COPY exporter.py runner.py ./
 COPY scripts/ ./scripts/
 
+# Create a non-root user to run the exporter.
+# The entrypoint runs as root briefly to fix SSH key permissions, then drops to this user.
+RUN useradd --system --no-create-home --shell /bin/false mcp
+
 # The exporter serves metrics on port 8000
 EXPOSE 8000
 
@@ -60,5 +64,12 @@ EXPOSE 8000
 ENV GRAFANA_REMOTE_WRITE_URL=""
 ENV GRAFANA_USER_ID=""
 ENV GRAFANA_API_KEY=""
+ENV WINRM_USERNAME=""
+ENV WINRM_PASSWORD=""
 
-CMD ["python", "exporter.py"]
+# Fix SSH key permissions at startup — Docker mounts files as 644 but SSH
+# requires private keys to be 600 or stricter, otherwise it refuses to use them.
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+CMD ["/entrypoint.sh"]
