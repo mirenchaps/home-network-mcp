@@ -52,6 +52,13 @@ COPY --from=builder /install /usr/local
 COPY exporter.py runner.py ./
 COPY scripts/ ./scripts/
 
+# Trust the WinRM host's self-signed cert.
+# update-ca-certificates reads every .crt in /usr/local/share/ca-certificates/
+# and adds it to the system trust store at /etc/ssl/certs/ca-certificates.crt.
+# PSWSMan uses that trust store when validating the HTTPS WinRM connection.
+COPY certs/winrm-host.pem /usr/local/share/ca-certificates/winrm-host.crt
+RUN update-ca-certificates
+
 # Create a non-root user to run the exporter.
 # The entrypoint runs as root briefly to fix SSH key permissions, then drops to this user.
 RUN useradd --system --no-create-home --shell /bin/false mcp

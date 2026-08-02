@@ -39,8 +39,10 @@ try {
         }
         if ($Username -and $Password) {
             $securePass = ConvertTo-SecureString $Password -AsPlainText -Force
-            $invokeParams.Credential = New-Object PSCredential($Username, $securePass)
-            $invokeParams.Authentication = "Basic"
+            $invokeParams.Credential      = New-Object PSCredential($Username, $securePass)
+            $invokeParams.Authentication  = "Basic"
+            $invokeParams.UseSSL          = $true
+            $invokeParams.Port            = 5986
         }
         $services = Invoke-Command @invokeParams
     }

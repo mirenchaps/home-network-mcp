@@ -21,12 +21,23 @@ try {
     if ($ComputerName -eq "localhost" -or $ComputerName -eq $env:COMPUTERNAME) {
         $os = Get-CimInstance -ClassName Win32_OperatingSystem
     } else {
-        $cimParams = @{ ClassName = 'Win32_OperatingSystem'; ComputerName = $ComputerName }
+        # CimInstance doesn't take -UseSSL directly — we create an explicit
+        # CimSession with SSL and pass that in instead.
         if ($Username -and $Password) {
             $securePass = ConvertTo-SecureString $Password -AsPlainText -Force
-            $cimParams.Credential = New-Object PSCredential($Username, $securePass)
+            $credential = New-Object PSCredential($Username, $securePass)
+            $sessionOpts = New-CimSessionOption -UseSsl
+            $session = New-CimSession `
+                -ComputerName $ComputerName `
+                -Port 5986 `
+                -Credential $credential `
+                -Authentication Basic `
+                -SessionOption $sessionOpts
+            $os = Get-CimInstance -ClassName Win32_OperatingSystem -CimSession $session
+            Remove-CimSession $session
+        } else {
+            $os = Get-CimInstance -ClassName Win32_OperatingSystem -ComputerName $ComputerName
         }
-        $os = Get-CimInstance @cimParams
     }
 
     $lastBoot = $os.LastBootUpTime

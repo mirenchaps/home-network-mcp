@@ -45,11 +45,14 @@ try {
             ScriptBlock  = $scriptBlock
             ArgumentList = $WarnThresholdPercent
         }
-        # On Linux, Kerberos is unavailable — pass explicit credentials if provided.
+        # On Linux, Kerberos is unavailable — use Basic auth over HTTPS (port 5986).
+        # UseSSL = $true encrypts the channel; Basic auth is safe over TLS.
         if ($Username -and $Password) {
             $securePass = ConvertTo-SecureString $Password -AsPlainText -Force
-            $invokeParams.Credential = New-Object PSCredential($Username, $securePass)
-            $invokeParams.Authentication = "Basic"
+            $invokeParams.Credential      = New-Object PSCredential($Username, $securePass)
+            $invokeParams.Authentication  = "Basic"
+            $invokeParams.UseSSL          = $true
+            $invokeParams.Port            = 5986
         }
         $volumes = Invoke-Command @invokeParams
     }
