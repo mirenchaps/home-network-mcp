@@ -1,712 +1,395 @@
 {
-	"title": "Home Lab Health",
-	"uid": "home-lab-health-v1",
-	"tags": [
-		"home-lab"
-	],
-	"timezone": "browser",
-	"refresh": "30s",
-	"schemaVersion": 38,
-	"time": {
-		"from": "now-1h",
-		"to": "now"
-	},
-	"templating": {
-		"list": [
-			{
-				"name": "datasource",
-				"type": "datasource",
-				"query": "prometheus",
-				"hide": 0,
-				"refresh": 1
-			}
-		]
-	},
-	"panels": [
-		{
-			"id": 10,
-			"type": "row",
-			"title": "Device Status",
-			"gridPos": {
-				"h": 1,
-				"w": 24,
-				"x": 0,
-				"y": 0
-			},
-			"collapsed": false
-		},
-		{
-			"id": 1,
-			"type": "stat",
-			"title": "Raspberry Pi",
-			"gridPos": {
-				"h": 6,
-				"w": 8,
-				"x": 0,
-				"y": 1
-			},
-			"datasource": {
-				"type": "prometheus",
-				"uid": "${datasource}"
-			},
-			"targets": [
-				{
-					"expr": "home_pi_uptime_seconds > bool 0",
-					"instant": true,
-					"refId": "A",
-					"datasource": {
-						"type": "prometheus",
-						"uid": "${datasource}"
-					}
-				}
-			],
-			"options": {
-				"colorMode": "background",
-				"graphMode": "none",
-				"justifyMode": "center",
-				"textMode": "auto",
-				"reduceOptions": {
-					"calcs": [
-						"lastNotNull"
-					]
-				}
-			},
-			"fieldConfig": {
-				"defaults": {
-					"color": {
-						"mode": "thresholds"
-					},
-					"thresholds": {
-						"mode": "absolute",
-						"steps": [
-							{
-								"color": "red",
-								"value": null
-							},
-							{
-								"color": "green",
-								"value": 1
-							}
-						]
-					},
-					"mappings": [
-						{
-							"type": "value",
-							"options": {
-								"0": {
-									"text": "DOWN",
-									"color": "red",
-									"index": 1
-								},
-								"1": {
-									"text": "UP",
-									"color": "green",
-									"index": 0
-								}
-							}
-						}
-					]
-				}
-			}
-		},
-		{
-			"id": 2,
-			"type": "stat",
-			"title": "Windows Server",
-			"gridPos": {
-				"h": 6,
-				"w": 8,
-				"x": 8,
-				"y": 1
-			},
-			"datasource": {
-				"type": "prometheus",
-				"uid": "${datasource}"
-			},
-			"targets": [
-				{
-					"expr": "home_device_up{host=\"192.168.0.124\"}",
-					"instant": true,
-					"refId": "A",
-					"datasource": {
-						"type": "prometheus",
-						"uid": "${datasource}"
-					}
-				}
-			],
-			"options": {
-				"colorMode": "background",
-				"graphMode": "none",
-				"justifyMode": "center",
-				"textMode": "auto",
-				"reduceOptions": {
-					"calcs": [
-						"lastNotNull"
-					]
-				}
-			},
-			"fieldConfig": {
-				"defaults": {
-					"color": {
-						"mode": "thresholds"
-					},
-					"thresholds": {
-						"mode": "absolute",
-						"steps": [
-							{
-								"color": "red",
-								"value": null
-							},
-							{
-								"color": "green",
-								"value": 1
-							}
-						]
-					},
-					"mappings": [
-						{
-							"type": "value",
-							"options": {
-								"0": {
-									"text": "DOWN",
-									"color": "red",
-									"index": 1
-								},
-								"1": {
-									"text": "UP",
-									"color": "green",
-									"index": 0
-								}
-							}
-						}
-					]
-				}
-			}
-		},
-		{
-			"id": 3,
-			"type": "stat",
-			"title": "Homebridge",
-			"gridPos": {
-				"h": 6,
-				"w": 8,
-				"x": 16,
-				"y": 1
-			},
-			"datasource": {
-				"type": "prometheus",
-				"uid": "${datasource}"
-			},
-			"targets": [
-				{
-					"expr": "home_pi_service_up{service=\"homebridge\"}",
-					"instant": true,
-					"refId": "A",
-					"datasource": {
-						"type": "prometheus",
-						"uid": "${datasource}"
-					}
-				}
-			],
-			"options": {
-				"colorMode": "background",
-				"graphMode": "none",
-				"justifyMode": "center",
-				"textMode": "auto",
-				"reduceOptions": {
-					"calcs": [
-						"lastNotNull"
-					]
-				}
-			},
-			"fieldConfig": {
-				"defaults": {
-					"color": {
-						"mode": "thresholds"
-					},
-					"thresholds": {
-						"mode": "absolute",
-						"steps": [
-							{
-								"color": "red",
-								"value": null
-							},
-							{
-								"color": "green",
-								"value": 1
-							}
-						]
-					},
-					"mappings": [
-						{
-							"type": "value",
-							"options": {
-								"0": {
-									"text": "DOWN",
-									"color": "red",
-									"index": 1
-								},
-								"1": {
-									"text": "UP",
-									"color": "green",
-									"index": 0
-								}
-							}
-						}
-					]
-				}
-			}
-		},
-		{
-			"id": 20,
-			"type": "row",
-			"title": "Raspberry Pi",
-			"gridPos": {
-				"h": 1,
-				"w": 24,
-				"x": 0,
-				"y": 7
-			},
-			"collapsed": false
-		},
-		{
-			"id": 4,
-			"type": "stat",
-			"title": "Uptime",
-			"gridPos": {
-				"h": 6,
-				"w": 8,
-				"x": 0,
-				"y": 8
-			},
-			"datasource": {
-				"type": "prometheus",
-				"uid": "${datasource}"
-			},
-			"targets": [
-				{
-					"expr": "home_pi_uptime_seconds",
-					"instant": true,
-					"refId": "A",
-					"datasource": {
-						"type": "prometheus",
-						"uid": "${datasource}"
-					}
-				}
-			],
-			"options": {
-				"colorMode": "value",
-				"graphMode": "none",
-				"justifyMode": "center",
-				"textMode": "auto",
-				"reduceOptions": {
-					"calcs": [
-						"lastNotNull"
-					]
-				}
-			},
-			"fieldConfig": {
-				"defaults": {
-					"unit": "dtdurations",
-					"color": {
-						"mode": "thresholds"
-					},
-					"thresholds": {
-						"mode": "absolute",
-						"steps": [
-							{
-								"color": "blue",
-								"value": null
-							}
-						]
-					}
-				}
-			}
-		},
-		{
-			"id": 5,
-			"type": "gauge",
-			"title": "Root Disk Used ( / )",
-			"gridPos": {
-				"h": 6,
-				"w": 8,
-				"x": 8,
-				"y": 8
-			},
-			"datasource": {
-				"type": "prometheus",
-				"uid": "${datasource}"
-			},
-			"targets": [
-				{
-					"expr": "(1 - home_pi_disk_free_ratio{mount=\"/\"}) * 100",
-					"instant": true,
-					"refId": "A",
-					"datasource": {
-						"type": "prometheus",
-						"uid": "${datasource}"
-					}
-				}
-			],
-			"options": {
-				"reduceOptions": {
-					"calcs": [
-						"lastNotNull"
-					]
-				},
-				"showThresholdMarkers": true,
-				"minVizWidth": 75
-			},
-			"fieldConfig": {
-				"defaults": {
-					"unit": "percent",
-					"min": 0,
-					"max": 100,
-					"color": {
-						"mode": "thresholds"
-					},
-					"thresholds": {
-						"mode": "absolute",
-						"steps": [
-							{
-								"color": "green",
-								"value": null
-							},
-							{
-								"color": "yellow",
-								"value": 70
-							},
-							{
-								"color": "red",
-								"value": 85
-							}
-						]
-					}
-				}
-			}
-		},
-		{
-			"id": 6,
-			"type": "gauge",
-			"title": "Boot Disk Used ( /boot )",
-			"gridPos": {
-				"h": 6,
-				"w": 8,
-				"x": 16,
-				"y": 8
-			},
-			"datasource": {
-				"type": "prometheus",
-				"uid": "${datasource}"
-			},
-			"targets": [
-				{
-					"expr": "(1 - home_pi_disk_free_ratio{mount=\"/boot\"}) * 100",
-					"instant": true,
-					"refId": "A",
-					"datasource": {
-						"type": "prometheus",
-						"uid": "${datasource}"
-					}
-				}
-			],
-			"options": {
-				"reduceOptions": {
-					"calcs": [
-						"lastNotNull"
-					]
-				},
-				"showThresholdMarkers": true,
-				"minVizWidth": 75
-			},
-			"fieldConfig": {
-				"defaults": {
-					"unit": "percent",
-					"min": 0,
-					"max": 100,
-					"color": {
-						"mode": "thresholds"
-					},
-					"thresholds": {
-						"mode": "absolute",
-						"steps": [
-							{
-								"color": "green",
-								"value": null
-							},
-							{
-								"color": "yellow",
-								"value": 70
-							},
-							{
-								"color": "red",
-								"value": 85
-							}
-						]
-					}
-				}
-			}
-		},
-		{
-			"id": 7,
-			"type": "timeseries",
-			"title": "Pi Disk Usage Over Time",
-			"gridPos": {
-				"h": 10,
-				"w": 24,
-				"x": 0,
-				"y": 14
-			},
-			"datasource": {
-				"type": "prometheus",
-				"uid": "${datasource}"
-			},
-			"targets": [
-				{
-					"expr": "(1 - home_pi_disk_free_ratio) * 100",
-					"legendFormat": "{{mount}}",
-					"refId": "A",
-					"datasource": {
-						"type": "prometheus",
-						"uid": "${datasource}"
-					}
-				}
-			],
-			"options": {
-				"legend": {
-					"displayMode": "list",
-					"placement": "bottom",
-					"showLegend": true
-				},
-				"tooltip": {
-					"mode": "single"
-				}
-			},
-			"fieldConfig": {
-				"defaults": {
-					"unit": "percent",
-					"min": 0,
-					"max": 100,
-					"color": {
-						"mode": "palette-classic"
-					},
-					"custom": {
-						"drawStyle": "line",
-						"lineWidth": 2,
-						"fillOpacity": 15,
-						"showPoints": "never",
-						"spanNulls": false
-					},
-					"thresholds": {
-						"mode": "absolute",
-						"steps": [
-							{
-								"color": "green",
-								"value": null
-							},
-							{
-								"color": "red",
-								"value": 85
-							}
-						]
-					}
-				}
-			}
-		}
-		,
-		{
-			"id": 40,
-			"type": "row",
-			"title": "Windows Server",
-			"gridPos": {
-				"h": 1,
-				"w": 24,
-				"x": 0,
-				"y": 24
-			},
-			"collapsed": false
-		},
-		{
-			"id": 41,
-			"type": "stat",
-			"title": "Uptime",
-			"gridPos": {
-				"h": 6,
-				"w": 8,
-				"x": 0,
-				"y": 25
-			},
-			"datasource": {
-				"type": "prometheus",
-				"uid": "${datasource}"
-			},
-			"targets": [
-				{
-					"expr": "home_uptime_seconds{host=\"192.168.0.124\"}",
-					"instant": true,
-					"refId": "A",
-					"datasource": {
-						"type": "prometheus",
-						"uid": "${datasource}"
-					}
-				}
-			],
-			"options": {
-				"colorMode": "value",
-				"graphMode": "none",
-				"justifyMode": "center",
-				"textMode": "auto",
-				"reduceOptions": {
-					"calcs": [
-						"lastNotNull"
-					]
-				}
-			},
-			"fieldConfig": {
-				"defaults": {
-					"unit": "dtdurations",
-					"color": {
-						"mode": "thresholds"
-					},
-					"thresholds": {
-						"mode": "absolute",
-						"steps": [
-							{
-								"color": "blue",
-								"value": null
-							}
-						]
-					}
-				}
-			}
-		},
-		{
-			"id": 42,
-			"type": "gauge",
-			"title": "C: Drive Used",
-			"gridPos": {
-				"h": 6,
-				"w": 8,
-				"x": 8,
-				"y": 25
-			},
-			"datasource": {
-				"type": "prometheus",
-				"uid": "${datasource}"
-			},
-			"targets": [
-				{
-					"expr": "(1 - home_disk_free_ratio{host=\"192.168.0.124\", volume=\"C:\"}) * 100",
-					"instant": true,
-					"refId": "A",
-					"datasource": {
-						"type": "prometheus",
-						"uid": "${datasource}"
-					}
-				}
-			],
-			"options": {
-				"reduceOptions": {
-					"calcs": [
-						"lastNotNull"
-					]
-				},
-				"showThresholdMarkers": true,
-				"minVizWidth": 75
-			},
-			"fieldConfig": {
-				"defaults": {
-					"unit": "percent",
-					"min": 0,
-					"max": 100,
-					"color": {
-						"mode": "thresholds"
-					},
-					"thresholds": {
-						"mode": "absolute",
-						"steps": [
-							{
-								"color": "green",
-								"value": null
-							},
-							{
-								"color": "yellow",
-								"value": 70
-							},
-							{
-								"color": "red",
-								"value": 85
-							}
-						]
-					}
-				}
-			}
-		},
-		{
-			"id": 43,
-			"type": "timeseries",
-			"title": "Windows Disk Usage Over Time",
-			"gridPos": {
-				"h": 10,
-				"w": 24,
-				"x": 0,
-				"y": 31
-			},
-			"datasource": {
-				"type": "prometheus",
-				"uid": "${datasource}"
-			},
-			"targets": [
-				{
-					"expr": "(1 - home_disk_free_ratio{host=\"192.168.0.124\"}) * 100",
-					"legendFormat": "{{volume}}",
-					"refId": "A",
-					"datasource": {
-						"type": "prometheus",
-						"uid": "${datasource}"
-					}
-				}
-			],
-			"options": {
-				"legend": {
-					"displayMode": "list",
-					"placement": "bottom",
-					"showLegend": true
-				},
-				"tooltip": {
-					"mode": "single"
-				}
-			},
-			"fieldConfig": {
-				"defaults": {
-					"unit": "percent",
-					"min": 0,
-					"max": 100,
-					"color": {
-						"mode": "palette-classic"
-					},
-					"custom": {
-						"drawStyle": "line",
-						"lineWidth": 2,
-						"fillOpacity": 15,
-						"showPoints": "never",
-						"spanNulls": false
-					},
-					"thresholds": {
-						"mode": "absolute",
-						"steps": [
-							{
-								"color": "green",
-								"value": null
-							},
-							{
-								"color": "red",
-								"value": 85
-							}
-						]
-					}
-				}
-			}
-		}
-	]
+  "annotations": [
+    {
+      "kind": "AnnotationQuery",
+      "spec": {
+        "builtIn": true,
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "query": {
+          "datasource": {
+            "name": "-- Grafana --"
+          },
+          "group": "grafana",
+          "kind": "DataQuery",
+          "spec": {},
+          "version": "v0"
+        }
+      }
+    }
+  ],
+  "cursorSync": "Off",
+  "editable": true,
+  "elements": {
+    "panel-1": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [{"kind": "PanelQuery","spec": {"hidden": false,"query": {"datasource": {"name": "${datasource}"},"group": "prometheus","kind": "DataQuery","spec": {"expr": "home_pi_uptime_seconds > bool 0","instant": true},"version": "v0"},"refId": "A"}}],
+            "queryOptions": {},"transformations": []
+          }
+        },
+        "description": "","id": 1,"links": [],"title": "Raspberry Pi",
+        "vizConfig": {
+          "group": "stat","kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "mappings": [{"options": {"0": {"color": "red","index": 1,"text": "DOWN"},"1": {"color": "green","index": 0,"text": "UP"}},"type": "value"}],
+                "thresholds": {"mode": "absolute","steps": [{"color": "red","value": 0},{"color": "green","value": 1}]}
+              },"overrides": []
+            },
+            "options": {"colorMode": "background","graphMode": "none","justifyMode": "center","orientation": "auto","percentChangeColorMode": "standard","reduceOptions": {"calcs": ["lastNotNull"],"fields": "","values": false},"showPercentChange": false,"textMode": "auto","wideLayout": true}
+          },
+          "version": "13.2.0-30537469096"
+        }
+      }
+    },
+    "panel-2": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [{"kind": "PanelQuery","spec": {"hidden": false,"query": {"datasource": {"name": "${datasource}"},"group": "prometheus","kind": "DataQuery","spec": {"expr": "home_device_up{host=\"192.168.0.124\"}","instant": true},"version": "v0"},"refId": "A"}}],
+            "queryOptions": {},"transformations": []
+          }
+        },
+        "description": "","id": 2,"links": [],"title": "Windows Server",
+        "vizConfig": {
+          "group": "stat","kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "mappings": [{"options": {"0": {"color": "red","index": 1,"text": "DOWN"},"1": {"color": "green","index": 0,"text": "UP"}},"type": "value"}],
+                "thresholds": {"mode": "absolute","steps": [{"color": "red","value": 0},{"color": "green","value": 1}]}
+              },"overrides": []
+            },
+            "options": {"colorMode": "background","graphMode": "none","justifyMode": "center","orientation": "auto","percentChangeColorMode": "standard","reduceOptions": {"calcs": ["lastNotNull"],"fields": "","values": false},"showPercentChange": false,"textMode": "auto","wideLayout": true}
+          },
+          "version": "13.2.0-30537469096"
+        }
+      }
+    },
+    "panel-3": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [{"kind": "PanelQuery","spec": {"hidden": false,"query": {"datasource": {"name": "${datasource}"},"group": "prometheus","kind": "DataQuery","spec": {"expr": "home_pi_service_up{service=\"homebridge\"}","instant": true},"version": "v0"},"refId": "A"}}],
+            "queryOptions": {},"transformations": []
+          }
+        },
+        "description": "","id": 3,"links": [],"title": "Homebridge",
+        "vizConfig": {
+          "group": "stat","kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "mappings": [{"options": {"0": {"color": "red","index": 1,"text": "DOWN"},"1": {"color": "green","index": 0,"text": "UP"}},"type": "value"}],
+                "thresholds": {"mode": "absolute","steps": [{"color": "red","value": 0},{"color": "green","value": 1}]}
+              },"overrides": []
+            },
+            "options": {"colorMode": "background","graphMode": "none","justifyMode": "center","orientation": "auto","percentChangeColorMode": "standard","reduceOptions": {"calcs": ["lastNotNull"],"fields": "","values": false},"showPercentChange": false,"textMode": "auto","wideLayout": true}
+          },
+          "version": "13.2.0-30537469096"
+        }
+      }
+    },
+    "panel-4": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [{"kind": "PanelQuery","spec": {"hidden": false,"query": {"datasource": {"name": "${datasource}"},"group": "prometheus","kind": "DataQuery","spec": {"expr": "home_pi_uptime_seconds","instant": true},"version": "v0"},"refId": "A"}}],
+            "queryOptions": {},"transformations": []
+          }
+        },
+        "description": "","id": 4,"links": [],"title": "Uptime",
+        "vizConfig": {
+          "group": "stat","kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "thresholds": {"mode": "absolute","steps": [{"color": "blue","value": 0}]},
+                "unit": "dtdurations"
+              },"overrides": []
+            },
+            "options": {"colorMode": "value","graphMode": "none","justifyMode": "center","orientation": "auto","percentChangeColorMode": "standard","reduceOptions": {"calcs": ["lastNotNull"],"fields": "","values": false},"showPercentChange": false,"textMode": "auto","wideLayout": true}
+          },
+          "version": "13.2.0-30537469096"
+        }
+      }
+    },
+    "panel-5": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [{"kind": "PanelQuery","spec": {"hidden": false,"query": {"datasource": {"name": "${datasource}"},"group": "prometheus","kind": "DataQuery","spec": {"expr": "(1 - home_pi_disk_free_ratio{mount=\"/\"}) * 100","instant": true},"version": "v0"},"refId": "A"}}],
+            "queryOptions": {},"transformations": []
+          }
+        },
+        "description": "","id": 5,"links": [],"title": "Root Disk Used ( / )",
+        "vizConfig": {
+          "group": "gauge","kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},"max": 100,"min": 0,
+                "thresholds": {"mode": "absolute","steps": [{"color": "green","value": 0},{"color": "yellow","value": 70},{"color": "red","value": 85}]},
+                "unit": "percent"
+              },"overrides": []
+            },
+            "options": {"barShape": "flat","barWidthFactor": 0.5,"effects": {"barGlow": false,"centerGlow": false,"gradient": false},"endpointMarker": "point","minVizHeight": 75,"minVizWidth": 75,"orientation": "auto","reduceOptions": {"calcs": ["lastNotNull"],"fields": "","values": false},"segmentCount": 1,"segmentSpacing": 0.3,"shape": "gauge","showThresholdLabels": false,"showThresholdMarkers": true,"sizing": "auto","sparkline": false,"textMode": "auto"}
+          },
+          "version": "13.2.0-30537469096"
+        }
+      }
+    },
+    "panel-6": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [{"kind": "PanelQuery","spec": {"hidden": false,"query": {"datasource": {"name": "${datasource}"},"group": "prometheus","kind": "DataQuery","spec": {"expr": "(1 - home_pi_disk_free_ratio{mount=\"/boot\"}) * 100","instant": true},"version": "v0"},"refId": "A"}}],
+            "queryOptions": {},"transformations": []
+          }
+        },
+        "description": "","id": 6,"links": [],"title": "Boot Disk Used ( /boot )",
+        "vizConfig": {
+          "group": "gauge","kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},"max": 100,"min": 0,
+                "thresholds": {"mode": "absolute","steps": [{"color": "green","value": 0},{"color": "yellow","value": 70},{"color": "red","value": 85}]},
+                "unit": "percent"
+              },"overrides": []
+            },
+            "options": {"barShape": "flat","barWidthFactor": 0.5,"effects": {"barGlow": false,"centerGlow": false,"gradient": false},"endpointMarker": "point","minVizHeight": 75,"minVizWidth": 75,"orientation": "auto","reduceOptions": {"calcs": ["lastNotNull"],"fields": "","values": false},"segmentCount": 1,"segmentSpacing": 0.3,"shape": "gauge","showThresholdLabels": false,"showThresholdMarkers": true,"sizing": "auto","sparkline": false,"textMode": "auto"}
+          },
+          "version": "13.2.0-30537469096"
+        }
+      }
+    },
+    "panel-7": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [{"kind": "PanelQuery","spec": {"hidden": false,"query": {"datasource": {"name": "${datasource}"},"group": "prometheus","kind": "DataQuery","spec": {"expr": "(1 - home_pi_disk_free_ratio) * 100","legendFormat": "{{mount}}"},"version": "v0"},"refId": "A"}}],
+            "queryOptions": {},"transformations": []
+          }
+        },
+        "description": "","id": 7,"links": [],"title": "Pi Disk Usage Over Time",
+        "vizConfig": {
+          "group": "timeseries","kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "palette-classic"},
+                "custom": {"axisBorderShow": false,"axisCenteredZero": false,"axisColorMode": "text","axisLabel": "","axisPlacement": "auto","barAlignment": 0,"barWidthFactor": 0.6,"drawStyle": "line","fillOpacity": 15,"gradientMode": "none","hideFrom": {"legend": false,"tooltip": false,"viz": false},"insertNulls": false,"lineInterpolation": "linear","lineWidth": 2,"pointSize": 5,"scaleDistribution": {"type": "linear"},"showPoints": "never","showValues": false,"spanNulls": false,"stacking": {"group": "A","mode": "none"},"thresholdsStyle": {"mode": "off"}},
+                "max": 100,"min": 0,
+                "thresholds": {"mode": "absolute","steps": [{"color": "green","value": 0},{"color": "red","value": 85}]},
+                "unit": "percent"
+              },"overrides": []
+            },
+            "options": {"legend": {"calcs": [],"displayMode": "list","placement": "bottom","showLegend": true},"tooltip": {"hideZeros": false,"mode": "single","sort": "none"}}
+          },
+          "version": "13.2.0-30537469096"
+        }
+      }
+    },
+    "panel-41": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [{"kind": "PanelQuery","spec": {"hidden": false,"query": {"datasource": {"name": "${datasource}"},"group": "prometheus","kind": "DataQuery","spec": {"expr": "home_uptime_seconds{host=\"192.168.0.124\"}","instant": true},"version": "v0"},"refId": "A"}}],
+            "queryOptions": {},"transformations": []
+          }
+        },
+        "description": "","id": 41,"links": [],"title": "Uptime",
+        "vizConfig": {
+          "group": "stat","kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},
+                "thresholds": {"mode": "absolute","steps": [{"color": "blue","value": 0}]},
+                "unit": "dtdurations"
+              },"overrides": []
+            },
+            "options": {"colorMode": "value","graphMode": "none","justifyMode": "center","orientation": "auto","percentChangeColorMode": "standard","reduceOptions": {"calcs": ["lastNotNull"],"fields": "","values": false},"showPercentChange": false,"textMode": "auto","wideLayout": true}
+          },
+          "version": "13.2.0-30537469096"
+        }
+      }
+    },
+    "panel-42": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [{"kind": "PanelQuery","spec": {"hidden": false,"query": {"datasource": {"name": "${datasource}"},"group": "prometheus","kind": "DataQuery","spec": {"expr": "(1 - home_disk_free_ratio{host=\"192.168.0.124\", volume=\"C:\"}) * 100","instant": true},"version": "v0"},"refId": "A"}}],
+            "queryOptions": {},"transformations": []
+          }
+        },
+        "description": "","id": 42,"links": [],"title": "C: Drive Used",
+        "vizConfig": {
+          "group": "gauge","kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "thresholds"},"max": 100,"min": 0,
+                "thresholds": {"mode": "absolute","steps": [{"color": "green","value": 0},{"color": "yellow","value": 70},{"color": "red","value": 85}]},
+                "unit": "percent"
+              },"overrides": []
+            },
+            "options": {"barShape": "flat","barWidthFactor": 0.5,"effects": {"barGlow": false,"centerGlow": false,"gradient": false},"endpointMarker": "point","minVizHeight": 75,"minVizWidth": 75,"orientation": "auto","reduceOptions": {"calcs": ["lastNotNull"],"fields": "","values": false},"segmentCount": 1,"segmentSpacing": 0.3,"shape": "gauge","showThresholdLabels": false,"showThresholdMarkers": true,"sizing": "auto","sparkline": false,"textMode": "auto"}
+          },
+          "version": "13.2.0-30537469096"
+        }
+      }
+    },
+    "panel-43": {
+      "kind": "Panel",
+      "spec": {
+        "data": {
+          "kind": "QueryGroup",
+          "spec": {
+            "queries": [{"kind": "PanelQuery","spec": {"hidden": false,"query": {"datasource": {"name": "${datasource}"},"group": "prometheus","kind": "DataQuery","spec": {"expr": "(1 - home_disk_free_ratio{host=\"192.168.0.124\"}) * 100","legendFormat": "{{volume}}"},"version": "v0"},"refId": "A"}}],
+            "queryOptions": {},"transformations": []
+          }
+        },
+        "description": "","id": 43,"links": [],"title": "Windows Disk Usage Over Time",
+        "vizConfig": {
+          "group": "timeseries","kind": "VizConfig",
+          "spec": {
+            "fieldConfig": {
+              "defaults": {
+                "color": {"mode": "palette-classic"},
+                "custom": {"axisBorderShow": false,"axisCenteredZero": false,"axisColorMode": "text","axisLabel": "","axisPlacement": "auto","barAlignment": 0,"barWidthFactor": 0.6,"drawStyle": "line","fillOpacity": 15,"gradientMode": "none","hideFrom": {"legend": false,"tooltip": false,"viz": false},"insertNulls": false,"lineInterpolation": "linear","lineWidth": 2,"pointSize": 5,"scaleDistribution": {"type": "linear"},"showPoints": "never","showValues": false,"spanNulls": false,"stacking": {"group": "A","mode": "none"},"thresholdsStyle": {"mode": "off"}},
+                "max": 100,"min": 0,
+                "thresholds": {"mode": "absolute","steps": [{"color": "green","value": 0},{"color": "red","value": 85}]},
+                "unit": "percent"
+              },"overrides": []
+            },
+            "options": {"legend": {"calcs": [],"displayMode": "list","placement": "bottom","showLegend": true},"tooltip": {"hideZeros": false,"mode": "single","sort": "none"}}
+          },
+          "version": "13.2.0-30537469096"
+        }
+      }
+    }
+  },
+  "layout": {
+    "kind": "RowsLayout",
+    "spec": {
+      "rows": [
+        {
+          "kind": "RowsLayoutRow",
+          "spec": {
+            "collapse": false,
+            "layout": {
+              "kind": "GridLayout",
+              "spec": {
+                "items": [
+                  {"kind": "GridLayoutItem","spec": {"element": {"kind": "ElementReference","name": "panel-1"},"height": 6,"width": 8,"x": 0,"y": 0}},
+                  {"kind": "GridLayoutItem","spec": {"element": {"kind": "ElementReference","name": "panel-2"},"height": 6,"width": 8,"x": 8,"y": 0}},
+                  {"kind": "GridLayoutItem","spec": {"element": {"kind": "ElementReference","name": "panel-3"},"height": 6,"width": 8,"x": 16,"y": 0}}
+                ]
+              }
+            },
+            "title": "Device Status"
+          }
+        },
+        {
+          "kind": "RowsLayoutRow",
+          "spec": {
+            "collapse": false,
+            "layout": {
+              "kind": "GridLayout",
+              "spec": {
+                "items": [
+                  {"kind": "GridLayoutItem","spec": {"element": {"kind": "ElementReference","name": "panel-4"},"height": 6,"width": 8,"x": 0,"y": 0}},
+                  {"kind": "GridLayoutItem","spec": {"element": {"kind": "ElementReference","name": "panel-5"},"height": 6,"width": 8,"x": 8,"y": 0}},
+                  {"kind": "GridLayoutItem","spec": {"element": {"kind": "ElementReference","name": "panel-6"},"height": 6,"width": 8,"x": 16,"y": 0}},
+                  {"kind": "GridLayoutItem","spec": {"element": {"kind": "ElementReference","name": "panel-7"},"height": 10,"width": 24,"x": 0,"y": 6}}
+                ]
+              }
+            },
+            "title": "Raspberry Pi"
+          }
+        },
+        {
+          "kind": "RowsLayoutRow",
+          "spec": {
+            "collapse": false,
+            "layout": {
+              "kind": "GridLayout",
+              "spec": {
+                "items": [
+                  {"kind": "GridLayoutItem","spec": {"element": {"kind": "ElementReference","name": "panel-41"},"height": 6,"width": 8,"x": 0,"y": 0}},
+                  {"kind": "GridLayoutItem","spec": {"element": {"kind": "ElementReference","name": "panel-42"},"height": 6,"width": 8,"x": 8,"y": 0}},
+                  {"kind": "GridLayoutItem","spec": {"element": {"kind": "ElementReference","name": "panel-43"},"height": 10,"width": 24,"x": 0,"y": 6}}
+                ]
+              }
+            },
+            "title": "Windows Server"
+          }
+        }
+      ]
+    }
+  },
+  "links": [],
+  "liveNow": false,
+  "preload": false,
+  "tags": ["home-lab"],
+  "timeSettings": {
+    "autoRefresh": "30s",
+    "autoRefreshIntervals": ["5s","10s","30s","1m","5m","15m","30m","1h","2h","1d"],
+    "fiscalYearStartMonth": 0,
+    "from": "now-1h",
+    "hideTimepicker": false,
+    "timezone": "browser",
+    "to": "now"
+  },
+  "title": "Home Lab Health",
+  "variables": [
+    {
+      "kind": "DatasourceVariable",
+      "spec": {
+        "allowCustomValue": true,
+        "current": {
+          "text": "grafanacloud-nobleswallow1375-prom",
+          "value": "grafanacloud-prom"
+        },
+        "hide": "dontHide",
+        "includeAll": false,
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "pluginId": "prometheus",
+        "refresh": "onDashboardLoad",
+        "regex": "",
+        "skipUrlSync": false
+      }
+    }
+  ]
 }
