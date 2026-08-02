@@ -18,7 +18,8 @@ from pathlib import Path
 
 from prometheus_client import Gauge, start_http_server
 
-from runner import run_pwsh_script, run_ssh_bash_script
+from runner import run_ssh_bash_script
+from winrm_collect import get_disk_usage, get_service_health, get_uptime
 
 # How often (in seconds) to re-poll all hosts
 SCRAPE_INTERVAL = 30
@@ -106,16 +107,12 @@ pi_uptime_seconds = Gauge(
 # ---------------------------------------------------------------------------
 
 async def collect_windows_host(host_cfg: dict) -> None:
-    """Collect all metrics for a single Windows host.
-
-    Uses disk reachability as a proxy for device_up — if Get-DiskUsage
-    fails (host unreachable, WinRM refused, etc.) we mark the device down
-    and skip the rest of the metrics for that host.
-    """
+    """Collect all metrics for a single Windows host via WinRM/HTTPS using pywinrm."""
     name = host_cfg["name"]
+    loop = asyncio.get_running_loop()
 
-    # --- disk (also tells us if the host is reachable) ---
-    disk_result = await run_pwsh_script("Get-DiskUsage.ps1", ComputerName=name)
+    # pywinrm is synchronous — run in a thread pool to avoid blocking the event loop
+    disk_result = await loop.run_in_executor(None, get_disk_usage, name)
     if disk_result.get("error"):
         device_up.labels(host=name).set(0)
         log.warning("Host %s unreachable: %s", name, disk_result["error"])
@@ -126,22 +123,16 @@ async def collect_windows_host(host_cfg: dict) -> None:
         ratio = vol["percent_free"] / 100.0
         disk_free_ratio.labels(host=name, volume=vol["drive"]).set(ratio)
 
-    # --- services ---
     services = host_cfg.get("watch_services", [])
     if services:
-        svc_result = await run_pwsh_script(
-            "Get-ServiceHealth.ps1",
-            ComputerName=name,
-            ServiceNames=services,
-        )
+        svc_result = await loop.run_in_executor(None, get_service_health, name, services)
         for svc in svc_result.get("services", []):
             val = 1 if svc["status"] == "Running" else 0
             service_up.labels(host=name, service=svc["name"]).set(val)
 
-    # --- uptime ---
-    up_result = await run_pwsh_script("Get-SystemUptime.ps1", ComputerName=name)
-    if "uptime_days" in up_result:
-        uptime_seconds.labels(host=name).set(up_result["uptime_days"] * 86400)
+    up_result = await loop.run_in_executor(None, get_uptime, name)
+    if "uptime_seconds" in up_result:
+        uptime_seconds.labels(host=name).set(up_result["uptime_seconds"])
 
 
 async def collect_pi(pi_cfg: dict) -> None:

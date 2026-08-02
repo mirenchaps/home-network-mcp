@@ -3,15 +3,15 @@ tests/test_exporter.py
 
 Unit tests for exporter.py.
 
-The exporter calls run_pwsh_script and run_ssh_bash_script to poll real hosts.
-In tests we mock those helpers so the tests run anywhere (CI, Mac, no network)
-and fail for code-logic reasons, not environmental ones.
+The exporter calls winrm_collect functions (Windows) and run_ssh_bash_script (Pi)
+to poll real hosts. In tests we mock those helpers so the tests run anywhere
+(CI, Mac, no network) and fail for code-logic reasons, not environmental ones.
 
 Run with: pytest tests/ -v
 Docs: https://docs.pytest.org  /  https://pytest-asyncio.readthedocs.io
 """
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from prometheus_client import REGISTRY
@@ -46,15 +46,9 @@ async def test_collect_windows_host_marks_device_up_on_success():
     """When disk polling succeeds, device_up should be set to 1."""
     host_cfg = {"name": "HOMELAB-DC01", "watch_services": []}
 
-    mock_disk = {"volumes": [{"drive": "C:", "percent_free": 40}]}
-
-    with patch("exporter.run_pwsh_script", new_callable=AsyncMock) as mock_run:
-        # First call is Get-DiskUsage, second would be Get-SystemUptime
-        mock_run.side_effect = [
-            mock_disk,
-            {"uptime_days": 3},
-        ]
-        await exporter.collect_windows_host(host_cfg)
+    with patch("exporter.get_disk_usage", MagicMock(return_value={"volumes": [{"drive": "C:", "percent_free": 40}]})):
+        with patch("exporter.get_uptime", MagicMock(return_value={"uptime_seconds": 259200})):
+            await exporter.collect_windows_host(host_cfg)
 
     assert get_gauge("home_device_up", {"host": "HOMELAB-DC01"}) == 1.0
 
@@ -64,8 +58,7 @@ async def test_collect_windows_host_marks_device_down_on_error():
     """When disk polling returns an error, device_up should be set to 0."""
     host_cfg = {"name": "HOMELAB-DC01", "watch_services": []}
 
-    with patch("exporter.run_pwsh_script", new_callable=AsyncMock) as mock_run:
-        mock_run.return_value = {"error": "WinRM connection refused"}
+    with patch("exporter.get_disk_usage", MagicMock(return_value={"error": "WinRM connection refused"})):
         await exporter.collect_windows_host(host_cfg)
 
     assert get_gauge("home_device_up", {"host": "HOMELAB-DC01"}) == 0.0
@@ -76,11 +69,9 @@ async def test_collect_windows_host_sets_disk_free_ratio():
     """Disk free ratio should be stored as a fraction (percent / 100)."""
     host_cfg = {"name": "HOMELAB-DC01", "watch_services": []}
 
-    mock_disk = {"volumes": [{"drive": "C:", "percent_free": 60}]}
-
-    with patch("exporter.run_pwsh_script", new_callable=AsyncMock) as mock_run:
-        mock_run.side_effect = [mock_disk, {"uptime_days": 1}]
-        await exporter.collect_windows_host(host_cfg)
+    with patch("exporter.get_disk_usage", MagicMock(return_value={"volumes": [{"drive": "C:", "percent_free": 60}]})):
+        with patch("exporter.get_uptime", MagicMock(return_value={"uptime_seconds": 86400})):
+            await exporter.collect_windows_host(host_cfg)
 
     ratio = get_gauge("home_disk_free_ratio", {"host": "HOMELAB-DC01", "volume": "C:"})
     assert ratio == pytest.approx(0.60)
