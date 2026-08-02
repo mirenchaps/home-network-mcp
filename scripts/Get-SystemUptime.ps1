@@ -32,7 +32,8 @@ try {
                 -Port 5986 `
                 -Credential $credential `
                 -Authentication Basic `
-                -SessionOption $sessionOpts
+                -SessionOption $sessionOpts `
+                -OperationTimeoutSec 10
             $os = Get-CimInstance -ClassName Win32_OperatingSystem -CimSession $session
             Remove-CimSession $session
         } else {

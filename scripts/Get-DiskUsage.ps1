@@ -47,12 +47,15 @@ try {
         }
         # On Linux, Kerberos is unavailable — use Basic auth over HTTPS (port 5986).
         # UseSSL = $true encrypts the channel; Basic auth is safe over TLS.
+        # OpenTimeout/OperationTimeout are in milliseconds — set to 10s so we get
+        # a real error back before Python's 30s asyncio timeout kills the process.
         if ($Username -and $Password) {
             $securePass = ConvertTo-SecureString $Password -AsPlainText -Force
             $invokeParams.Credential      = New-Object PSCredential($Username, $securePass)
             $invokeParams.Authentication  = "Basic"
             $invokeParams.UseSSL          = $true
             $invokeParams.Port            = 5986
+            $invokeParams.SessionOption   = New-PSSessionOption -OpenTimeout 10000 -OperationTimeout 10000
         }
         $volumes = Invoke-Command @invokeParams
     }
