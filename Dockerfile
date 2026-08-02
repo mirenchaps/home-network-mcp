@@ -34,22 +34,16 @@ WORKDIR /app
 # PowerShell release: https://github.com/PowerShell/PowerShell/releases
 RUN apt-get update && apt-get install -y --no-install-recommends \
         openssh-client \
-        wget \
         ca-certificates \
         libssl3 \
-    && wget -q "https://github.com/PowerShell/PowerShell/releases/download/v7.6.4/powershell_7.6.4-1.deb_amd64.deb" \
-    && dpkg -i powershell_7.6.4-1.deb_amd64.deb || true \
-    && apt-get install -f -y \
-    && rm powershell_7.6.4-1.deb_amd64.deb \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && pwsh -NonInteractive -Command "Install-Module -Name PSWSMan -Force -Scope AllUsers; Import-Module PSWSMan; Install-WSMan"
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy the installed packages from the builder stage
 COPY --from=builder /install /usr/local
 
 # Copy application source
-COPY exporter.py runner.py ./
+COPY exporter.py runner.py winrm_collect.py ./
 COPY scripts/ ./scripts/
 
 # Trust the WinRM host's self-signed cert.
