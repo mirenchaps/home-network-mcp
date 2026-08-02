@@ -34,39 +34,24 @@ pipeline {
     stages {
         stage('Deploy') {
             steps {
-                // withCredentials pulls WINRM_USERNAME and WINRM_PASSWORD from the
-                // Jenkins credential store and binds them to local variables.
-                // They are masked in logs and never stored in the image.
-                // Add credentials at: Jenkins → Manage Jenkins → Credentials
-                withCredentials([
-                    string(credentialsId: 'WINRM_USERNAME', variable: 'WINRM_USER'),
-                    string(credentialsId: 'WINRM_PASSWORD', variable: 'WINRM_PASS'),
-                ]) {
-                    terraformDeploy(
-                        imageTag:       "mirenchaps/home-network-mcp:${params.IMAGE_TAG}",
-                        port:           8000,
-                        configFilePath: '/etc/home-network-mcp/config.json',
-                        sshKeyPath:     '/etc/home-network-mcp/id_ed25519',
-                        envVars: [
-                            WINRM_USERNAME: env.WINRM_USER,
-                            WINRM_PASSWORD: env.WINRM_PASS,
-                        ]
-                    )
-                }
+                kubernetesDeploy(
+                    deployment: 'home-network-mcp',
+                    image:      "mirenchaps/home-network-mcp:${params.IMAGE_TAG}"
+                )
             }
         }
 
         stage('Smoke Test') {
             steps {
-                // /metrics is the Prometheus endpoint — a 200 response means
-                // the exporter started successfully and is collecting data
-                smokeTest(path: '/metrics', port: 8000)
+                // Hit the NodePort on the Kubernetes node directly.
+                // 192.168.0.38 is the k3s node; 30080 is the NodePort defined in k8s/service.yaml.
+                smokeTest(path: '/metrics', port: 30080, host: '192.168.0.38')
             }
         }
     }
 
     post {
         success { echo "Deployed home-network-mcp:${params.IMAGE_TAG} successfully" }
-        failure { echo "Deployment failed — check Terraform output above" }
+        failure { echo "Deployment failed — check kubectl output above" }
     }
 }
