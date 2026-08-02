@@ -450,7 +450,7 @@
 		{
 			"id": 7,
 			"type": "timeseries",
-			"title": "Disk Usage Over Time",
+			"title": "Pi Disk Usage Over Time",
 			"gridPos": {
 				"h": 10,
 				"w": 24,
@@ -465,6 +465,201 @@
 				{
 					"expr": "(1 - home_pi_disk_free_ratio) * 100",
 					"legendFormat": "{{mount}}",
+					"refId": "A",
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					}
+				}
+			],
+			"options": {
+				"legend": {
+					"displayMode": "list",
+					"placement": "bottom",
+					"showLegend": true
+				},
+				"tooltip": {
+					"mode": "single"
+				}
+			},
+			"fieldConfig": {
+				"defaults": {
+					"unit": "percent",
+					"min": 0,
+					"max": 100,
+					"color": {
+						"mode": "palette-classic"
+					},
+					"custom": {
+						"drawStyle": "line",
+						"lineWidth": 2,
+						"fillOpacity": 15,
+						"showPoints": "never",
+						"spanNulls": false
+					},
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "red",
+								"value": 85
+							}
+						]
+					}
+				}
+			}
+		}
+		,
+		{
+			"id": 40,
+			"type": "row",
+			"title": "Windows Server",
+			"gridPos": {
+				"h": 1,
+				"w": 24,
+				"x": 0,
+				"y": 24
+			},
+			"collapsed": false
+		},
+		{
+			"id": 41,
+			"type": "stat",
+			"title": "Uptime",
+			"gridPos": {
+				"h": 6,
+				"w": 8,
+				"x": 0,
+				"y": 25
+			},
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"targets": [
+				{
+					"expr": "home_uptime_seconds{host=\"192.168.0.124\"}",
+					"instant": true,
+					"refId": "A",
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					}
+				}
+			],
+			"options": {
+				"colorMode": "value",
+				"graphMode": "none",
+				"justifyMode": "center",
+				"textMode": "auto",
+				"reduceOptions": {
+					"calcs": [
+						"lastNotNull"
+					]
+				}
+			},
+			"fieldConfig": {
+				"defaults": {
+					"unit": "dtdurations",
+					"color": {
+						"mode": "thresholds"
+					},
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "blue",
+								"value": null
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"id": 42,
+			"type": "gauge",
+			"title": "C: Drive Used",
+			"gridPos": {
+				"h": 6,
+				"w": 8,
+				"x": 8,
+				"y": 25
+			},
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"targets": [
+				{
+					"expr": "(1 - home_disk_free_ratio{host=\"192.168.0.124\", volume=\"C:\"}) * 100",
+					"instant": true,
+					"refId": "A",
+					"datasource": {
+						"type": "prometheus",
+						"uid": "${datasource}"
+					}
+				}
+			],
+			"options": {
+				"reduceOptions": {
+					"calcs": [
+						"lastNotNull"
+					]
+				},
+				"showThresholdMarkers": true,
+				"minVizWidth": 75
+			},
+			"fieldConfig": {
+				"defaults": {
+					"unit": "percent",
+					"min": 0,
+					"max": 100,
+					"color": {
+						"mode": "thresholds"
+					},
+					"thresholds": {
+						"mode": "absolute",
+						"steps": [
+							{
+								"color": "green",
+								"value": null
+							},
+							{
+								"color": "yellow",
+								"value": 70
+							},
+							{
+								"color": "red",
+								"value": 85
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"id": 43,
+			"type": "timeseries",
+			"title": "Windows Disk Usage Over Time",
+			"gridPos": {
+				"h": 10,
+				"w": 24,
+				"x": 0,
+				"y": 31
+			},
+			"datasource": {
+				"type": "prometheus",
+				"uid": "${datasource}"
+			},
+			"targets": [
+				{
+					"expr": "(1 - home_disk_free_ratio{host=\"192.168.0.124\"}) * 100",
+					"legendFormat": "{{volume}}",
 					"refId": "A",
 					"datasource": {
 						"type": "prometheus",
