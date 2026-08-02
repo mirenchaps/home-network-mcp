@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home-network-mcp
+  labels:
+    app: home-network-mcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: home-network-mcp
+  template:
+    metadata:
+      labels:
+        app: home-network-mcp
+    spec:
+      containers:
+        - name: home-network-mcp
+          image: mirenchaps/home-network-mcp:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: WINRM_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: winrm-credentials
+                  key: username
+            - name: WINRM_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: winrm-credentials
+                  key: password
+          volumeMounts:
+            - name: pi-ssh-key
+              mountPath: /app/id_ed25519
+              subPath: id_ed25519
+              readOnly: true
+      volumes:
+        - name: pi-ssh-key
+          secret:
+            secretName: pi-ssh-key
+            defaultMode: 0600
