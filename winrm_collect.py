@@ -31,7 +31,7 @@ def get_disk_usage(host: str) -> dict:
     """Returns {"volumes": [{"drive": "C:", "percent_free": 45.2}]} or {"error": "..."}"""
     try:
         result = _session(host).run_ps(
-            "Get-WmiObject Win32_LogicalDisk -Filter 'DriveType=3' | "
+            "Get-CimInstance Win32_LogicalDisk -Filter 'DriveType=3' | "
             "Select-Object DeviceID,Size,FreeSpace | ConvertTo-Json -Compress"
         )
     except Exception as exc:
