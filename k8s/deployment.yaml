@@ -35,8 +35,15 @@ spec:
               mountPath: /app/id_ed25519
               subPath: id_ed25519
               readOnly: true
+            - name: config
+              mountPath: /app/config.json
+              subPath: config.json
+              readOnly: true
       volumes:
         - name: pi-ssh-key
           secret:
             secretName: pi-ssh-key
             defaultMode: 0600
+        - name: config
+          configMap:
+            name: home-network-mcp-config
