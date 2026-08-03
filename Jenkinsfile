@@ -51,8 +51,9 @@ pipeline {
             steps {
                 // Exporter: /metrics on port 30080
                 smokeTest(path: '/metrics', port: 30080, host: '192.168.0.38')
-                // MCP server: /mcp on port 30081 (streamable-HTTP transport)
-                smokeTest(path: '/mcp', port: 30081, host: '192.168.0.38')
+                // MCP server: /health on port 30081
+                // (/mcp requires a proper MCP handshake — plain curl returns 400)
+                smokeTest(path: '/health', port: 30081, host: '192.168.0.38')
             }
         }
     }
