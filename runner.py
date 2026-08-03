@@ -10,7 +10,6 @@ collection) so the execution logic lives in one place.
 
 import asyncio
 import json
-import os
 from pathlib import Path
 from typing import Any
 
@@ -40,15 +39,6 @@ async def run_pwsh_script(script_name: str, **params: Any) -> dict:
             cmd.append(",".join(str(v) for v in value))
         else:
             cmd.append(str(value))
-
-    # Pass Windows credentials from environment variables so they are never
-    # baked into the image or config file.
-    winrm_user = os.environ.get("WINRM_USERNAME", "")
-    winrm_pass = os.environ.get("WINRM_PASSWORD", "")
-    if winrm_user:
-        cmd += ["-Username", winrm_user]
-    if winrm_pass:
-        cmd += ["-Password", winrm_pass]
 
     try:
         proc = await asyncio.create_subprocess_exec(

@@ -1,16 +1,14 @@
 # home-network-mcp/Dockerfile
 #
-# Builds the Prometheus metrics exporter into a Docker image.
-# Only exporter.py and its dependencies are needed at runtime —
-# server.py (the MCP server) is a separate process run outside Docker.
+# Builds a single image used by two separate K3s Deployments:
+#   - exporter pod: runs exporter.py (Prometheus metrics, port 8000)
+#   - server pod:   runs server.py  (MCP server, streamable-HTTP, port 8001)
+#
+# Which process starts is controlled by the CMD arg passed via entrypoint.sh:
+#   CMD ["/entrypoint.sh", "exporter"]   ← default (exporter Deployment)
+#   CMD ["/entrypoint.sh", "server"]     ← MCP server Deployment
 #
 # Build:  docker build -t home-network-mcp .
-# Run:    docker run -p 8000:8000 \
-#           -e GRAFANA_REMOTE_WRITE_URL=... \
-#           -e GRAFANA_USER_ID=... \
-#           -e GRAFANA_API_KEY=... \
-#           home-network-mcp
-#
 # Docs: https://docs.docker.com/reference/dockerfile/
 
 # --- build stage: install dependencies into a clean layer ---
@@ -28,22 +26,30 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install PowerShell 7 (for WinRM calls) and openssh-client (for SSH to Pi).
-# dpkg -i exits with code 1 on missing deps — || true lets the chain continue
-# so apt-get install -f can resolve those deps immediately after.
-# PowerShell release: https://github.com/PowerShell/PowerShell/releases
+# Install openssh-client (SSH to Pi), ca-certificates + libssl3 (pywinrm TLS),
+# and PowerShell 7 (pwsh, for scan_network in the MCP server pod).
+# The exporter pod doesn't use pwsh, but both pods share this image —
+# the extra ~100MB is the trade-off for a single image to maintain.
+#
+# PowerShell install method: Microsoft's official apt repo for Debian bookworm.
+# Docs: https://learn.microsoft.com/en-us/powershell/scripting/install/install-debian
 RUN apt-get update && apt-get install -y --no-install-recommends \
         openssh-client \
         ca-certificates \
         libssl3 \
+        curl \
+        gnupg \
+    && curl -sSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /usr/share/keyrings/microsoft.gpg \
+    && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/microsoft-debian-bookworm-prod bookworm main" > /etc/apt/sources.list.d/microsoft.list \
+    && apt-get update && apt-get install -y --no-install-recommends powershell \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the installed packages from the builder stage
 COPY --from=builder /install /usr/local
 
-# Copy application source
-COPY exporter.py runner.py winrm_collect.py ./
+# Copy application source — both the exporter and the MCP server
+COPY exporter.py runner.py winrm_collect.py homebridge.py server.py ./
 COPY scripts/ ./scripts/
 
 # Trust the WinRM host's self-signed cert.
@@ -57,20 +63,24 @@ RUN update-ca-certificates
 # The entrypoint runs as root briefly to fix SSH key permissions, then drops to this user.
 RUN useradd --system --no-create-home --shell /bin/false mcp
 
-# The exporter serves metrics on port 8000
-EXPOSE 8000
+# The exporter serves metrics on port 8000; the MCP server runs on port 8001.
+EXPOSE 8000 8001
 
 # Credentials are injected at runtime via environment variables — never baked in.
-# See alloy-config.river for the variable names Grafana Alloy expects.
 ENV GRAFANA_REMOTE_WRITE_URL=""
 ENV GRAFANA_USER_ID=""
 ENV GRAFANA_API_KEY=""
 ENV WINRM_USERNAME=""
 ENV WINRM_PASSWORD=""
+ENV HOMEBRIDGE_HOST=""
+ENV HOMEBRIDGE_USERNAME=""
+ENV HOMEBRIDGE_PASSWORD=""
 
 # Fix SSH key permissions at startup — Docker mounts files as 644 but SSH
 # requires private keys to be 600 or stricter, otherwise it refuses to use them.
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-CMD ["/entrypoint.sh"]
+# Default runs the exporter. The MCP server Deployment overrides this with
+# CMD ["/entrypoint.sh", "server"] in k8s/mcp-server-deployment.yaml.
+CMD ["/entrypoint.sh", "exporter"]

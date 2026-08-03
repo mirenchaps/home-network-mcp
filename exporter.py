@@ -3,9 +3,10 @@ exporter.py
 
 Prometheus metrics exporter for home-network-mcp.
 
-Runs a collection loop every SCRAPE_INTERVAL seconds, polling the same
-PowerShell and SSH helpers used by the MCP server, and serves the results
-at http://localhost:8000/metrics for Grafana Alloy to scrape.
+Runs a collection loop every SCRAPE_INTERVAL seconds, polling Windows hosts
+via pywinrm (winrm_collect.py) and the Raspberry Pi over SSH (runner.py),
+and serves the results at http://localhost:8000/metrics for Grafana Alloy
+to scrape.
 
 Run alongside server.py as a separate process:
     python exporter.py
@@ -162,8 +163,8 @@ async def collect_pi(pi_cfg: dict) -> None:
 
     # --- uptime ---
     up_result = await run_ssh_bash_script("check-uptime.sh", host=host, user=user, ssh_key_path=key)
-    if "uptime_days" in up_result:
-        pi_uptime_seconds.labels(host=host).set(up_result["uptime_days"] * 86400)
+    if "uptime_seconds" in up_result:
+        pi_uptime_seconds.labels(host=host).set(up_result["uptime_seconds"])
 
 
 # ---------------------------------------------------------------------------

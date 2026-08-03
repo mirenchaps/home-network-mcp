@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home-network-mcp-server
+  labels:
+    app: home-network-mcp-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: home-network-mcp-server
+  template:
+    metadata:
+      labels:
+        app: home-network-mcp-server
+    spec:
+      containers:
+        - name: home-network-mcp-server
+          image: mirenchaps/home-network-mcp:latest
+          # Override CMD to run server.py instead of the default exporter.py
+          command: ["/entrypoint.sh", "server"]
+          ports:
+            - containerPort: 8001
+          env:
+            - name: WINRM_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: winrm-credentials
+                  key: username
+            - name: WINRM_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: winrm-credentials
+                  key: password
+            - name: HOMEBRIDGE_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: homebridge-credentials
+                  key: host
+            - name: HOMEBRIDGE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: homebridge-credentials
+                  key: username
+            - name: HOMEBRIDGE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: homebridge-credentials
+                  key: password
+          volumeMounts:
+            - name: pi-ssh-key
+              mountPath: /app/id_ed25519
+              subPath: id_ed25519
+              readOnly: true
+            - name: config
+              mountPath: /app/config.json
+              subPath: config.json
+              readOnly: true
+      volumes:
+        - name: pi-ssh-key
+          secret:
+            secretName: pi-ssh-key
+            defaultMode: 0600
+        - name: config
+          configMap:
+            name: home-network-mcp-config

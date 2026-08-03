@@ -2,8 +2,6 @@
 winrm_collect.py
 
 Collects metrics from Windows hosts via WinRM/HTTPS using pywinrm.
-Replaces the PSWSMan-based PowerShell script approach, which timed out on Linux.
-
 Functions are synchronous — call them with asyncio.get_running_loop().run_in_executor()
 to avoid blocking the async collection loop.
 """
@@ -11,10 +9,18 @@ to avoid blocking the async collection loop.
 import json
 import os
 
+import certifi
 import winrm
 
 WINRM_PORT = 5986
-CA_BUNDLE = "/etc/ssl/certs/ca-certificates.crt"
+
+# Use the system CA bundle when available (Linux/container), fall back to
+# certifi's bundled certs on macOS or any platform without the system bundle.
+_SYSTEM_CA = "/etc/ssl/certs/ca-certificates.crt"
+CA_BUNDLE = os.environ.get(
+    "WINRM_CA_BUNDLE",
+    _SYSTEM_CA if os.path.exists(_SYSTEM_CA) else certifi.where(),
+)
 
 
 def _session(host: str) -> winrm.Session:

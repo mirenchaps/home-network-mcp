@@ -26,6 +26,7 @@ cat <<EOF
   "host": "$HOSTNAME_VAL",
   "checked_at": "$CHECKED_AT",
   "last_boot": "$LAST_BOOT",
+  "uptime_seconds": $UPTIME_SECONDS,
   "uptime_days": $UPTIME_DAYS,
   "uptime_readable": "$UPTIME_READABLE"
 }
