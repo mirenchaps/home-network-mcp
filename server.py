@@ -194,27 +194,27 @@ async def get_homebridge_status() -> dict:
 if __name__ == "__main__":
     # Streamable-HTTP transport so the server can run in K3s and be reached
     # from any device over Tailscale, rather than being tied to a local machine.
+    # Claude Desktop config: {"type": "streamable-http", "url": "http://<k3s-tailscale-ip>:30081/mcp"}
     #
-    # We use mcp.run() which correctly initialises the session manager's task
-    # group (required for the MCP protocol to work). The /health route is added
-    # via the custom_starlette_routes parameter on the low-level server so it
-    # shares the same app without breaking the session manager lifecycle.
+    # We build the app manually (rather than calling mcp.run) so we can mount
+    # a /health route alongside /mcp. The /mcp endpoint requires a proper MCP
+    # client handshake — a plain curl returns 400, which would fail the smoke test.
     import anyio
     import uvicorn
+    from starlette.applications import Starlette
     from starlette.requests import Request
     from starlette.responses import JSONResponse
-    from starlette.routing import Route
+    from starlette.routing import Mount, Route
 
     async def health(request: Request) -> JSONResponse:
         return JSONResponse({"status": "ok"})
 
     async def serve() -> None:
-        # Build the app via the low-level server so we can inject /health
-        # without bypassing the session manager's run() lifecycle.
-        app = mcp._lowlevel_server.streamable_http_app(
-            host="0.0.0.0",
-            custom_starlette_routes=[Route("/health", health)],
-        )
+        mcp_app = mcp.streamable_http_app(host="0.0.0.0")
+        app = Starlette(routes=[
+            Route("/health", health),
+            Mount("/", app=mcp_app),
+        ])
         config = uvicorn.Config(app, host="0.0.0.0", port=8001)
         server = uvicorn.Server(config)
         await server.serve()
