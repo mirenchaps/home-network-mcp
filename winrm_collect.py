@@ -11,10 +11,18 @@ to avoid blocking the async collection loop.
 import json
 import os
 
+import certifi
 import winrm
 
 WINRM_PORT = 5986
-CA_BUNDLE = "/etc/ssl/certs/ca-certificates.crt"
+
+# Use the system CA bundle when available (Linux/container), fall back to
+# certifi's bundled certs on macOS or any platform without the system bundle.
+_SYSTEM_CA = "/etc/ssl/certs/ca-certificates.crt"
+CA_BUNDLE = os.environ.get(
+    "WINRM_CA_BUNDLE",
+    _SYSTEM_CA if os.path.exists(_SYSTEM_CA) else certifi.where(),
+)
 
 
 def _session(host: str) -> winrm.Session:

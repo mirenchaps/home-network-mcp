@@ -91,7 +91,7 @@ async def test_collect_pi_sets_disk_free_ratio():
     with patch("exporter.run_ssh_bash_script", new_callable=AsyncMock) as mock_run:
         mock_run.side_effect = [
             mock_disk,
-            {"uptime_days": 10},
+            {"uptime_seconds": 864000},
         ]
         await exporter.collect_pi(pi_cfg)
 
