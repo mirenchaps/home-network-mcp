@@ -195,4 +195,28 @@ if __name__ == "__main__":
     # Streamable-HTTP transport so the server can run in K3s and be reached
     # from any device over Tailscale, rather than being tied to a local machine.
     # Claude Desktop config: {"type": "streamable-http", "url": "http://<k3s-tailscale-ip>:30081/mcp"}
-    mcp.run("streamable-http", host="0.0.0.0", port=8001)
+    #
+    # We build the app manually (rather than calling mcp.run) so we can mount
+    # a /health route alongside /mcp. The /mcp endpoint requires a proper MCP
+    # client handshake — a plain curl returns 400, which would fail the smoke test.
+    import anyio
+    import uvicorn
+    from starlette.applications import Starlette
+    from starlette.requests import Request
+    from starlette.responses import JSONResponse
+    from starlette.routing import Mount, Route
+
+    async def health(request: Request) -> JSONResponse:
+        return JSONResponse({"status": "ok"})
+
+    async def serve() -> None:
+        mcp_app = mcp.streamable_http_app(host="0.0.0.0")
+        app = Starlette(routes=[
+            Route("/health", health),
+            Mount("/", app=mcp_app),
+        ])
+        config = uvicorn.Config(app, host="0.0.0.0", port=8001)
+        server = uvicorn.Server(config)
+        await server.serve()
+
+    anyio.run(serve)
