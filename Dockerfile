@@ -28,10 +28,8 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install PowerShell 7 (for WinRM calls) and openssh-client (for SSH to Pi).
-# dpkg -i exits with code 1 on missing deps — || true lets the chain continue
-# so apt-get install -f can resolve those deps immediately after.
-# PowerShell release: https://github.com/PowerShell/PowerShell/releases
+# Install openssh-client (for SSH to Pi) and ca-certificates (for pywinrm TLS validation).
+# WinRM calls go through pywinrm (Python-native) — no PowerShell needed in the container.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         openssh-client \
         ca-certificates \

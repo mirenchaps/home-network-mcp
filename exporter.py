@@ -3,9 +3,10 @@ exporter.py
 
 Prometheus metrics exporter for home-network-mcp.
 
-Runs a collection loop every SCRAPE_INTERVAL seconds, polling the same
-PowerShell and SSH helpers used by the MCP server, and serves the results
-at http://localhost:8000/metrics for Grafana Alloy to scrape.
+Runs a collection loop every SCRAPE_INTERVAL seconds, polling Windows hosts
+via pywinrm (winrm_collect.py) and the Raspberry Pi over SSH (runner.py),
+and serves the results at http://localhost:8000/metrics for Grafana Alloy
+to scrape.
 
 Run alongside server.py as a separate process:
     python exporter.py

@@ -2,8 +2,6 @@
 winrm_collect.py
 
 Collects metrics from Windows hosts via WinRM/HTTPS using pywinrm.
-Replaces the PSWSMan-based PowerShell script approach, which timed out on Linux.
-
 Functions are synchronous — call them with asyncio.get_running_loop().run_in_executor()
 to avoid blocking the async collection loop.
 """
