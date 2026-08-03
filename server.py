@@ -66,7 +66,9 @@ async def check_service_health(
 @mcp.tool(title="Check Disk Usage")
 async def check_disk_usage(
     computer_name: Annotated[str, Field(description="Target hostname or IP. Defaults to localhost.")] = "localhost",
-    warn_threshold_percent: Annotated[int, Field(description="Percent free space below which a volume is flagged as warning.", ge=0, le=100)] = 15,
+    warn_threshold_percent: Annotated[
+        int, Field(description="Percent free space below which a volume is flagged as warning.", ge=0, le=100)
+    ] = 15,
 ) -> dict:
     """Check disk usage on all fixed volumes of a Windows host, flagging low free space."""
     loop = asyncio.get_running_loop()
@@ -93,7 +95,9 @@ async def check_pi_service(
     host: Annotated[str, Field(description='Pi hostname or IP, e.g. "192.168.0.113" or "raspberrypi.local"')],
     service_name: Annotated[str, Field(description="systemd unit name to check")] = "homebridge",
     user: Annotated[str, Field(description="SSH user on the Pi")] = "pi",
-    ssh_key_path: Annotated[str | None, Field(description="Path to SSH private key. Uses default SSH key if omitted.")] = None,
+    ssh_key_path: Annotated[
+        str | None, Field(description="Path to SSH private key. Uses default SSH key if omitted.")
+    ] = None,
 ) -> dict:
     """Check the status of a systemd service on a Raspberry Pi over SSH."""
     return await run_ssh_bash_script(
@@ -109,8 +113,12 @@ async def check_pi_service(
 async def check_pi_disk_usage(
     host: Annotated[str, Field(description='Pi hostname or IP, e.g. "192.168.0.113" or "raspberrypi.local"')],
     user: Annotated[str, Field(description="SSH user on the Pi")] = "pi",
-    warn_threshold_percent: Annotated[int, Field(description="Percent free space below which a volume is flagged as warning.", ge=0, le=100)] = 15,
-    ssh_key_path: Annotated[str | None, Field(description="Path to SSH private key. Uses default SSH key if omitted.")] = None,
+    warn_threshold_percent: Annotated[
+        int, Field(description="Percent free space below which a volume is flagged as warning.", ge=0, le=100)
+    ] = 15,
+    ssh_key_path: Annotated[
+        str | None, Field(description="Path to SSH private key. Uses default SSH key if omitted.")
+    ] = None,
 ) -> dict:
     """Check disk usage on a Raspberry Pi's mounted filesystems over SSH."""
     return await run_ssh_bash_script(
@@ -126,7 +134,9 @@ async def check_pi_disk_usage(
 async def check_pi_uptime(
     host: Annotated[str, Field(description='Pi hostname or IP, e.g. "192.168.0.113" or "raspberrypi.local"')],
     user: Annotated[str, Field(description="SSH user on the Pi")] = "pi",
-    ssh_key_path: Annotated[str | None, Field(description="Path to SSH private key. Uses default SSH key if omitted.")] = None,
+    ssh_key_path: Annotated[
+        str | None, Field(description="Path to SSH private key. Uses default SSH key if omitted.")
+    ] = None,
 ) -> dict:
     """Get system uptime and last boot time for a Raspberry Pi over SSH."""
     return await run_ssh_bash_script(
@@ -152,7 +162,10 @@ async def list_accessories() -> dict:
 async def set_accessory(
     unique_id: Annotated[str, Field(description="The accessory's uniqueId from list_accessories.")],
     characteristic_type: Annotated[str, Field(
-        description='The characteristic to change. Common values: "On" (true/false), "Brightness" (0-100), "ColorTemperature", "Hue", "Saturation".'
+        description=(
+            'The characteristic to change. Common values: "On" (true/false), '
+            '"Brightness" (0-100), "ColorTemperature", "Hue", "Saturation".'
+        )
     )],
     value: Annotated[str, Field(
         description='The new value as a string. Use "true"/"false" for On/Off, a number like "75" for Brightness.'
