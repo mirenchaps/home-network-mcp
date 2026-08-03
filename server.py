@@ -2,18 +2,26 @@
 home-network-mcp
 
 A personal MCP server that exposes home network / home-lab monitoring
-capabilities as tools an LLM client (e.g. Claude Desktop) can call.
+and control capabilities as tools an LLM client (e.g. Claude Desktop)
+can call.
 
 Design notes
 ------------
 Windows targets (WinRM): tools call pywinrm helpers in winrm_collect.py
-directly — no subprocess/PowerShell needed for authenticated WinRM calls.
-Credentials are read from WINRM_USERNAME / WINRM_PASSWORD env vars.
+directly. Credentials are read from WINRM_USERNAME / WINRM_PASSWORD env vars.
 
-Network sweep: still uses PowerShell (Get-DeviceStatus.ps1) via runner.py,
+Network sweep: uses PowerShell (Get-DeviceStatus.ps1) via runner.py,
 since it uses .NET ping APIs that work cross-platform with pwsh.
 
 Linux/Pi targets: runner.py pipes Bash scripts over SSH.
+
+Homebridge: homebridge.py makes authenticated HTTP calls to the Homebridge
+REST API. Credentials are read from HOMEBRIDGE_HOST / HOMEBRIDGE_USERNAME /
+HOMEBRIDGE_PASSWORD env vars.
+
+Transport: runs as streamable-HTTP on port 8001 so it can be deployed to
+K3s and reached from any device via Tailscale, rather than being tied to
+a single machine via stdio.
 """
 
 import asyncio
@@ -23,6 +31,7 @@ from pydantic import Field
 
 from mcp.server import MCPServer
 
+import homebridge
 from runner import run_pwsh_script, run_ssh_bash_script
 from winrm_collect import get_disk_usage, get_service_health, get_uptime
 
@@ -128,5 +137,49 @@ async def check_pi_uptime(
     )
 
 
+@mcp.tool(title="List Accessories")
+async def list_accessories() -> dict:
+    """List all Homebridge accessories and their current state.
+
+    Returns every accessory Homebridge knows about — lights, fans, sensors, etc.
+    Each entry includes the accessory's uniqueId (needed for set_accessory),
+    display name, type, and current characteristic values (On, Brightness, etc.).
+    """
+    return await homebridge.list_accessories()
+
+
+@mcp.tool(title="Set Accessory")
+async def set_accessory(
+    unique_id: Annotated[str, Field(description="The accessory's uniqueId from list_accessories.")],
+    characteristic_type: Annotated[str, Field(
+        description='The characteristic to change. Common values: "On" (true/false), "Brightness" (0-100), "ColorTemperature", "Hue", "Saturation".'
+    )],
+    value: Annotated[str, Field(
+        description='The new value as a string. Use "true"/"false" for On/Off, a number like "75" for Brightness.'
+    )],
+) -> dict:
+    """Control a Homebridge accessory — turn lights or fans on/off, set brightness, etc.
+
+    Use list_accessories first to find the uniqueId and available characteristics
+    for the accessory you want to control.
+    """
+    return await homebridge.set_accessory(unique_id, characteristic_type, value)
+
+
+@mcp.tool(title="List Homebridge Plugins")
+async def list_homebridge_plugins() -> dict:
+    """List all installed Homebridge plugins with their version and enabled state."""
+    return await homebridge.list_plugins()
+
+
+@mcp.tool(title="Get Homebridge Status")
+async def get_homebridge_status() -> dict:
+    """Get the current Homebridge status and the state of any child bridges."""
+    return await homebridge.get_homebridge_status()
+
+
 if __name__ == "__main__":
-    mcp.run()
+    # Streamable-HTTP transport so the server can run in K3s and be reached
+    # from any device over Tailscale, rather than being tied to a local machine.
+    # Claude Desktop config: {"type": "streamable-http", "url": "http://<k3s-tailscale-ip>:30081/mcp"}
+    mcp.run("streamable-http", host="0.0.0.0", port=8001)

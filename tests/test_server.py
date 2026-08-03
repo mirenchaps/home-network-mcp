@@ -165,3 +165,56 @@ async def test_check_pi_uptime_returns_ssh_result():
         result = await server.check_pi_uptime(host="192.168.0.113", user="mchapane")
 
     assert result == expected
+
+
+# ---------------------------------------------------------------------------
+# Homebridge tools — delegate to homebridge module
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_list_accessories_delegates_to_homebridge():
+    """list_accessories should return whatever homebridge.list_accessories returns."""
+    expected = {"accessories": [{"uniqueId": "aaa", "serviceName": "Bedroom Fan"}]}
+
+    with patch("server.homebridge.list_accessories", new_callable=AsyncMock, return_value=expected):
+        result = await server.list_accessories()
+
+    assert result == expected
+
+
+@pytest.mark.asyncio
+async def test_set_accessory_passes_args_to_homebridge():
+    """set_accessory should call homebridge.set_accessory with the right args."""
+    expected = {"uniqueId": "aaa", "values": {"On": True}}
+
+    with patch("server.homebridge.set_accessory", new_callable=AsyncMock, return_value=expected) as mock_set:
+        result = await server.set_accessory(
+            unique_id="aaa",
+            characteristic_type="On",
+            value="true",
+        )
+
+    mock_set.assert_called_once_with("aaa", "On", "true")
+    assert result == expected
+
+
+@pytest.mark.asyncio
+async def test_list_homebridge_plugins_delegates():
+    """list_homebridge_plugins should return whatever homebridge.list_plugins returns."""
+    expected = {"plugins": [{"name": "homebridge-tuya", "version": "3.2.0"}]}
+
+    with patch("server.homebridge.list_plugins", new_callable=AsyncMock, return_value=expected):
+        result = await server.list_homebridge_plugins()
+
+    assert result == expected
+
+
+@pytest.mark.asyncio
+async def test_get_homebridge_status_delegates():
+    """get_homebridge_status should return whatever homebridge.get_homebridge_status returns."""
+    expected = {"status": {"status": "up"}, "child_bridges": []}
+
+    with patch("server.homebridge.get_homebridge_status", new_callable=AsyncMock, return_value=expected):
+        result = await server.get_homebridge_status()
+
+    assert result == expected

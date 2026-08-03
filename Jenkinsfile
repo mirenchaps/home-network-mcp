@@ -34,8 +34,14 @@ pipeline {
     stages {
         stage('Deploy') {
             steps {
+                // Deploy both the exporter pod and the MCP server pod.
+                // Both use the same image — entrypoint.sh selects the process.
                 kubernetesDeploy(
                     deployment: 'home-network-mcp',
+                    image:      "mirenchaps/home-network-mcp:${params.IMAGE_TAG}"
+                )
+                kubernetesDeploy(
+                    deployment: 'home-network-mcp-server',
                     image:      "mirenchaps/home-network-mcp:${params.IMAGE_TAG}"
                 )
             }
@@ -43,9 +49,10 @@ pipeline {
 
         stage('Smoke Test') {
             steps {
-                // Hit the NodePort on the Kubernetes node directly.
-                // 192.168.0.38 is the k3s node; 30080 is the NodePort defined in k8s/service.yaml.
+                // Exporter: /metrics on port 30080
                 smokeTest(path: '/metrics', port: 30080, host: '192.168.0.38')
+                // MCP server: /mcp on port 30081 (streamable-HTTP transport)
+                smokeTest(path: '/mcp', port: 30081, host: '192.168.0.38')
             }
         }
     }
