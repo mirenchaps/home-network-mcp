@@ -38,7 +38,7 @@ pipeline {
                 // instead of pushing to the cluster directly. ArgoCD picks up
                 // the commit and syncs it — this job's job ends at git push.
                 withCredentials([usernamePassword(
-                    credentialsId: 'mirenchaps',
+                    credentialsId: 'github-home-lab-gitops-push',
                     usernameVariable: 'GIT_USER',
                     passwordVariable: 'GIT_TOKEN'
                 )]) {
