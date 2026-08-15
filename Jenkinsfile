@@ -34,16 +34,29 @@ pipeline {
     stages {
         stage('Deploy') {
             steps {
-                // Deploy both the exporter pod and the MCP server pod.
-                // Both use the same image — entrypoint.sh selects the process.
-                kubernetesDeploy(
-                    deployment: 'home-network-mcp',
-                    image:      "mirenchaps/home-network-mcp:${params.IMAGE_TAG}"
-                )
-                kubernetesDeploy(
-                    deployment: 'home-network-mcp-server',
-                    image:      "mirenchaps/home-network-mcp:${params.IMAGE_TAG}"
-                )
+                // GitOps deploy: commit the new image tag to home-lab-gitops
+                // instead of pushing to the cluster directly. ArgoCD picks up
+                // the commit and syncs it — this job's job ends at git push.
+                withCredentials([usernamePassword(
+                    credentialsId: 'mirenchaps',
+                    usernameVariable: 'GIT_USER',
+                    passwordVariable: 'GIT_TOKEN'
+                )]) {
+                    sh '''
+                        rm -rf home-lab-gitops
+                        git clone https://${GIT_USER}:${GIT_TOKEN}@github.com/mirenchaps/home-lab-gitops.git
+                        cd home-lab-gitops
+
+                        sed -i "s|image: mirenchaps/home-network-mcp:.*|image: mirenchaps/home-network-mcp:${IMAGE_TAG}|" apps/home-network-mcp/deployment.yaml
+                        sed -i "s|image: mirenchaps/home-network-mcp:.*|image: mirenchaps/home-network-mcp:${IMAGE_TAG}|" apps/home-network-mcp-server/deployment.yaml
+
+                        git config user.email "jenkins@home-lab.local"
+                        git config user.name "Jenkins"
+                        git add apps/home-network-mcp/deployment.yaml apps/home-network-mcp-server/deployment.yaml
+                        git commit -m "Deploy home-network-mcp:${IMAGE_TAG}"
+                        git push
+                    '''
+                }
             }
         }
 
