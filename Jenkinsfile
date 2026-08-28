@@ -49,12 +49,15 @@ pipeline {
                         git clone https://${GIT_USER}:${GIT_TOKEN}@github.com/mirenchaps/home-lab-gitops.git
                         cd home-lab-gitops
 
-                        sed -i "s|image: mirenchaps/home-network-mcp:.*|image: mirenchaps/home-network-mcp:${IMAGE_TAG}|" apps/home-network-mcp/deployment.yaml
-                        sed -i "s|image: mirenchaps/home-network-mcp:.*|image: mirenchaps/home-network-mcp:${IMAGE_TAG}|" apps/home-network-mcp-server/deployment.yaml
+                        # Both apps share charts/home-network-mcp and override only
+                        # image.tag in their own values.yaml -- the repository name
+                        # lives in the chart's base values.
+                        sed -i "s|tag: sha-[a-f0-9]*|tag: ${IMAGE_TAG}|" apps/home-network-mcp/values.yaml
+                        sed -i "s|tag: sha-[a-f0-9]*|tag: ${IMAGE_TAG}|" apps/home-network-mcp-server/values.yaml
 
                         git config user.email "jenkins@home-lab.local"
                         git config user.name "Jenkins"
-                        git add apps/home-network-mcp/deployment.yaml apps/home-network-mcp-server/deployment.yaml
+                        git add apps/home-network-mcp/values.yaml apps/home-network-mcp-server/values.yaml
                         git commit -m "Deploy home-network-mcp:${IMAGE_TAG}"
 
                         # main is protected — push to a deploy branch and go through the API instead.
