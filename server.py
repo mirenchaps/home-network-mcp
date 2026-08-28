@@ -25,8 +25,11 @@ a single machine via stdio.
 """
 
 import asyncio
+import time
+from functools import wraps
 from typing import Annotated
 
+from prometheus_client import Counter, Histogram
 from pydantic import Field
 
 from mcp.server import MCPServer
@@ -37,8 +40,47 @@ from winrm_collect import get_disk_usage, get_service_health, get_uptime
 
 mcp = MCPServer("home-network-mcp")
 
+# Per-tool request count and latency. Nothing like this existed before -- the
+# only prior signal was a /health route that always returns "ok" regardless
+# of whether WinRM, the Pi, or Homebridge are actually reachable. These are
+# what make this server a viable chaos target: something to compare a
+# steady-state baseline against, the same way vllm's metrics do for Qwen.
+TOOL_CALLS = Counter(
+    "mcp_tool_calls_total",
+    "Total MCP tool invocations",
+    ["tool", "outcome"],
+)
+TOOL_CALL_DURATION = Histogram(
+    "mcp_tool_call_duration_seconds",
+    "MCP tool invocation duration in seconds",
+    ["tool"],
+)
+
+
+def observe(tool_name: str):
+    """Records call count and latency for a tool. Applied below @mcp.tool so
+    functools.wraps preserves __wrapped__, which inspect.signature() follows
+    automatically -- MCP's schema generation still sees the real signature.
+    """
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            start = time.monotonic()
+            try:
+                result = await func(*args, **kwargs)
+                TOOL_CALLS.labels(tool=tool_name, outcome="success").inc()
+                return result
+            except Exception:
+                TOOL_CALLS.labels(tool=tool_name, outcome="error").inc()
+                raise
+            finally:
+                TOOL_CALL_DURATION.labels(tool=tool_name).observe(time.monotonic() - start)
+        return wrapper
+    return decorator
+
 
 @mcp.tool(title="Scan Network")
+@observe("scan_network")
 async def scan_network(
     subnet: Annotated[str, Field(description='First three octets of the subnet, e.g. "192.168.0"')],
     start_host: Annotated[int, Field(description="First host octet to scan", ge=1, le=254)] = 1,
@@ -54,6 +96,7 @@ async def scan_network(
 
 
 @mcp.tool(title="Check Service Health")
+@observe("check_service_health")
 async def check_service_health(
     service_names: Annotated[list[str], Field(description='Service names to check, e.g. ["Spooler", "W32Time"]')],
     computer_name: Annotated[str, Field(description="Target hostname or IP. Defaults to localhost.")] = "localhost",
@@ -64,6 +107,7 @@ async def check_service_health(
 
 
 @mcp.tool(title="Check Disk Usage")
+@observe("check_disk_usage")
 async def check_disk_usage(
     computer_name: Annotated[str, Field(description="Target hostname or IP. Defaults to localhost.")] = "localhost",
     warn_threshold_percent: Annotated[
@@ -82,6 +126,7 @@ async def check_disk_usage(
 
 
 @mcp.tool(title="Check Uptime")
+@observe("check_uptime")
 async def check_uptime(
     computer_name: Annotated[str, Field(description="Target hostname or IP. Defaults to localhost.")] = "localhost",
 ) -> dict:
@@ -91,6 +136,7 @@ async def check_uptime(
 
 
 @mcp.tool(title="Check Pi Service")
+@observe("check_pi_service")
 async def check_pi_service(
     host: Annotated[str, Field(description='Pi hostname or IP, e.g. "192.168.0.113" or "raspberrypi.local"')],
     service_name: Annotated[str, Field(description="systemd unit name to check")] = "homebridge",
@@ -110,6 +156,7 @@ async def check_pi_service(
 
 
 @mcp.tool(title="Check Pi Disk Usage")
+@observe("check_pi_disk_usage")
 async def check_pi_disk_usage(
     host: Annotated[str, Field(description='Pi hostname or IP, e.g. "192.168.0.113" or "raspberrypi.local"')],
     user: Annotated[str, Field(description="SSH user on the Pi")] = "pi",
@@ -131,6 +178,7 @@ async def check_pi_disk_usage(
 
 
 @mcp.tool(title="Check Pi Uptime")
+@observe("check_pi_uptime")
 async def check_pi_uptime(
     host: Annotated[str, Field(description='Pi hostname or IP, e.g. "192.168.0.113" or "raspberrypi.local"')],
     user: Annotated[str, Field(description="SSH user on the Pi")] = "pi",
@@ -148,6 +196,7 @@ async def check_pi_uptime(
 
 
 @mcp.tool(title="List Accessories")
+@observe("list_accessories")
 async def list_accessories() -> dict:
     """List all Homebridge accessories and their current state.
 
@@ -159,6 +208,7 @@ async def list_accessories() -> dict:
 
 
 @mcp.tool(title="Set Accessory")
+@observe("set_accessory")
 async def set_accessory(
     unique_id: Annotated[str, Field(description="The accessory's uniqueId from list_accessories.")],
     characteristic_type: Annotated[str, Field(
@@ -180,12 +230,14 @@ async def set_accessory(
 
 
 @mcp.tool(title="List Homebridge Plugins")
+@observe("list_homebridge_plugins")
 async def list_homebridge_plugins() -> dict:
     """List all installed Homebridge plugins with their version and enabled state."""
     return await homebridge.list_plugins()
 
 
 @mcp.tool(title="Get Homebridge Status")
+@observe("get_homebridge_status")
 async def get_homebridge_status() -> dict:
     """Get the current Homebridge status and the state of any child bridges."""
     return await homebridge.get_homebridge_status()
@@ -201,19 +253,23 @@ if __name__ == "__main__":
     # shares the same app without breaking the session manager lifecycle.
     import anyio
     import uvicorn
+    from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
     from starlette.requests import Request
-    from starlette.responses import JSONResponse
+    from starlette.responses import JSONResponse, Response
     from starlette.routing import Route
 
     async def health(request: Request) -> JSONResponse:
         return JSONResponse({"status": "ok"})
+
+    async def metrics(request: Request) -> Response:
+        return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
     async def serve() -> None:
         # Build the app via the low-level server so we can inject /health
         # without bypassing the session manager's run() lifecycle.
         app = mcp._lowlevel_server.streamable_http_app(
             host="0.0.0.0",
-            custom_starlette_routes=[Route("/health", health)],
+            custom_starlette_routes=[Route("/health", health), Route("/metrics", metrics)],
         )
         config = uvicorn.Config(app, host="0.0.0.0", port=8001)
         server = uvicorn.Server(config)
