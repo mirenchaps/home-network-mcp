@@ -2,7 +2,7 @@
 
 A personal [MCP](https://modelcontextprotocol.io) server that lets an LLM client (Claude Desktop, etc.) monitor my home network and home lab: which devices are online, whether key services are healthy, disk space, and uptime — across both my Windows Server 2022 home lab and a Raspberry Pi running Homebridge.
 
-Alongside the MCP server, a Prometheus metrics exporter runs continuously, feeding real-time data into Grafana Cloud for dashboarding and alerting.
+Alongside the MCP server, a Prometheus metrics exporter runs continuously, scraped by the home lab's own kube-prometheus-stack for dashboarding and alerting.
 
 ## Why I built this
 
@@ -53,8 +53,7 @@ The exporter (`exporter.py`) continuously collects and serves the following Prom
 - `mcp[cli]` and `prometheus_client` — see `requirements.txt`
 - For remote hosts: WinRM enabled and reachable (`Enable-PSRemoting`), and the account running the server needs appropriate rights on target machines
 - For the Raspberry Pi: SSH key-based auth set up (`ssh-copy-id pi@<pi-host>`) — password auth is intentionally not supported
-- [Grafana Alloy](https://grafana.com/docs/alloy/latest/) — installed on the Windows box to scrape and forward metrics to Grafana Cloud
-- A [Grafana Cloud](https://grafana.com) account (free tier) for dashboards and alerting
+- The home lab's kube-prometheus-stack scrapes both Deployments in-cluster; no external metrics account is needed
 
 ## Setup
 
@@ -103,27 +102,24 @@ python exporter.py
 
 Metrics are served at `http://localhost:8000/metrics`.
 
-### Grafana Alloy setup
+### In-cluster Prometheus scraping
 
-1. [Download and install Alloy](https://grafana.com/docs/alloy/latest/get-started/install/) on the Windows box
-1. Set your Grafana Cloud credentials as system environment variables in PowerShell:
+Both Deployments are scraped by the home lab's kube-prometheus-stack. Each one ships a
+`ServiceMonitor` rendered by the shared Helm chart in `home-lab-gitops`, enabled per app
+via `metrics.enabled` in that app's values file.
 
-```powershell
-[System.Environment]::SetEnvironmentVariable("GRAFANA_REMOTE_WRITE_URL", "https://...", "Machine")
-[System.Environment]::SetEnvironmentVariable("GRAFANA_USER_ID", "123456", "Machine")
-[System.Environment]::SetEnvironmentVariable("GRAFANA_API_KEY", "glc_...", "Machine")
-```
+| App | Port | Path | Metrics |
+| --- | --- | --- | --- |
+| `home-network-mcp` | 8000 | `/metrics` | `home_device_up`, `home_service_up`, disk/uptime gauges |
+| `home-network-mcp-server` | 8001 | `/metrics` | `mcp_tool_calls_total`, `mcp_tool_call_duration_seconds` |
 
-1. Point Alloy at the config file:
+The `ServiceMonitor` must carry `release: prometheus` -- that Prometheus only adopts
+ServiceMonitors with that label, and one without it is ignored silently.
 
-```powershell
-alloy run alloy-config.river
-```
-
-Alloy will scrape `http://localhost:8000/metrics` every 30 seconds and forward the data to Grafana Cloud.
-
-Your Grafana Cloud credentials (remote write URL, user ID, API key) are generated at:
-**Grafana Cloud → your stack → Connections → Add new connection → Prometheus**
+Previously the exporter's metrics went to Grafana Cloud via a Grafana Alloy agent running
+directly on the Windows box. That was dropped once the app moved into Kubernetes: two
+metrics destinations meant two places to look, and the Alloy config still described
+scraping `localhost:8000` on a host the app no longer ran on.
 
 ### macOS-specific notes
 
@@ -165,7 +161,6 @@ home-network-mcp/
 ├── server.py                   # MCP server + tool definitions
 ├── runner.py                   # Shared async helpers (pwsh + SSH)
 ├── exporter.py                 # Prometheus metrics exporter
-├── alloy-config.river          # Grafana Alloy config (reads creds from env vars)
 ├── config.example.json         # Example host inventory (copy to config.json)
 ├── scripts/
 │   ├── Get-DeviceStatus.ps1    # subnet ping sweep
@@ -181,7 +176,7 @@ home-network-mcp/
 
 ## Notes / limitations
 
-- Credentials are never hardcoded — Grafana Cloud credentials are read from environment variables via `env()` in `alloy-config.river`, and `config.json` is gitignored.
+- Credentials are never hardcoded — `config.json` is gitignored, and WinRM/Homebridge/SSH credentials are injected from Kubernetes Secrets.
 - **This is a personal project for my own home lab, not hardened for production or multi-tenant use — no auth on the PowerShell remoting beyond standard WinRM, no rate limiting, no retry logic beyond a basic timeout.**
 - Local (non-domain) WinRM setups may need `TrustedHosts` configured for cross-machine calls without Kerberos.
 - Tested against Windows Server 2022 and Windows 11 hosts on PowerShell 7.4.
