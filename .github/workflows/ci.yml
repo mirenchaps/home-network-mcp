@@ -23,9 +23,15 @@ on:
     branches: [main]
 
 jobs:
-  ci:
-    uses: mirenchaps/ci-platform/.github/workflows/python-ci.yml@main
+  validate:
+    uses: mirenchaps/ci-platform/.github/workflows/python-validate.yml@main
     with:
-      # "mirenchaps/home-network-mcp" becomes the full image name on Docker Hub
+      python-version: "3.12"
+
+  publish:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: validate
+    uses: mirenchaps/ci-platform/.github/workflows/python-publish.yml@main
+    with:
       image-name: home-network-mcp
     secrets: inherit
