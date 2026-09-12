@@ -15,6 +15,7 @@ Run alongside server.py as a separate process:
 import asyncio
 import json
 import logging
+import re
 from pathlib import Path
 
 from prometheus_client import Gauge, start_http_server
@@ -35,8 +36,8 @@ log = logging.getLogger(__name__)
 
 
 def _one_line(value: object) -> str:
-    """Collapse newlines so remote output cannot forge additional log records."""
-    return str(value).replace("\r", " ").replace("\n", " ")
+    """Allow only printable characters so remote output cannot forge log records."""
+    return re.sub(r"[^A-Za-z0-9 ,.:;_/@()\[\]-]", "", str(value))[:300]
 
 
 def load_config() -> dict:
