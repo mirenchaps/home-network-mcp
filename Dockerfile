@@ -39,7 +39,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libssl3 \
         curl \
         gnupg \
-    && curl -sSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /usr/share/keyrings/microsoft.gpg \
+    && curl -sSL --proto '=https' --tlsv1.2 https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /usr/share/keyrings/microsoft.gpg \
     && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/microsoft-debian-bookworm-prod bookworm main" > /etc/apt/sources.list.d/microsoft.list \
     && apt-get update && apt-get install -y --no-install-recommends powershell \
     && apt-get clean \

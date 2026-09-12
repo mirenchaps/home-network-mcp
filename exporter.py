@@ -15,6 +15,7 @@ Run alongside server.py as a separate process:
 import asyncio
 import json
 import logging
+import re
 from pathlib import Path
 
 from prometheus_client import Gauge, start_http_server
@@ -32,6 +33,11 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(message)s",
 )
 log = logging.getLogger(__name__)
+
+
+def _one_line(value: object) -> str:
+    """Allow only printable characters so remote output cannot forge log records."""
+    return re.sub(r"[^A-Za-z0-9 ,.:;_/@()\[\]-]", "", str(value))[:300]
 
 
 def load_config() -> dict:
@@ -116,7 +122,7 @@ async def collect_windows_host(host_cfg: dict) -> None:
     disk_result = await loop.run_in_executor(None, get_disk_usage, name)
     if disk_result.get("error"):
         device_up.labels(host=name).set(0)
-        log.warning("Host %s unreachable: %s", name, disk_result["error"])
+        log.warning("Host %s unreachable: %s", name, _one_line(disk_result["error"]))
         return
 
     device_up.labels(host=name).set(1)
@@ -146,7 +152,7 @@ async def collect_pi(pi_cfg: dict) -> None:
     disk_result = await run_ssh_bash_script("check-disk.sh", host=host, user=user, ssh_key_path=key)
     if disk_result.get("error"):
         pi_disk_free_ratio.labels(host=host, mount="/").set(0)
-        log.warning("Pi %s unreachable: %s", host, disk_result["error"])
+        log.warning("Pi %s unreachable: %s", host, _one_line(disk_result["error"]))
         return
 
     for vol in disk_result.get("volumes", []):
