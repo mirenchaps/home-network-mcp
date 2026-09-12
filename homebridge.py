@@ -25,6 +25,9 @@ log = logging.getLogger(__name__)
 
 HOMEBRIDGE_PORT = 8581
 
+# Homebridge UI serves plain HTTP on the LAN by default; override where TLS exists.
+HOMEBRIDGE_SCHEME = os.environ.get("HOMEBRIDGE_SCHEME", "http")
+
 # The /api/accessories endpoint polls the live HAP bridge state for every
 # accessory, which can take 30-60s on a Pi with multiple plugins. Other
 # endpoints (auth, plugins, status) are fast and use the short timeout.
@@ -43,7 +46,7 @@ def _base_url() -> str:
             "HOMEBRIDGE_HOST environment variable is not set. "
             "Set it to the hostname or IP of your Homebridge instance."
         )
-    return f"http://{host}:{HOMEBRIDGE_PORT}"
+    return f"{HOMEBRIDGE_SCHEME}://{host}:{HOMEBRIDGE_PORT}"
 
 
 async def _get_token() -> str:
