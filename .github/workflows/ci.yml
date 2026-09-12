@@ -27,6 +27,7 @@ jobs:
     uses: mirenchaps/ci-platform/.github/workflows/python-validate.yml@main
     with:
       python-version: "3.12"
+    secrets: inherit
 
   publish:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
