@@ -6,6 +6,7 @@
 
 # line-length is top-level — applies to both linting (E501) and formatting
 line-length = 120
+target-version = "py312"
 
 [lint]
 # E/W: pycodestyle errors and warnings
